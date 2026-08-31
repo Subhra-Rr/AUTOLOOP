@@ -1,0 +1,6 @@
+{
+  "name": "AUTOLOOP",
+  "description": "Autonomous AI Software Engineering Platform — One prompt, autonomous execution, continuous self-evaluation, automatic repair, and verified completion.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
