@@ -1,10 +1,11 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 import { ProjectState, AutonomyMode } from './src/types';
 import { createEmptyProjectState, executeAutonomousStep } from './server/geminiOrchestrator';
-import { listWorkspaceFiles, readWorkspaceFile } from './server/workspace';
+import { listWorkspaceFiles, readWorkspaceFile, getWorkspacePath } from './server/workspace';
 
 dotenv.config();
 
@@ -198,6 +199,104 @@ app.post('/api/projects/:id/intervention/reject', (req: Request, res: Response) 
   project.pendingInterventions = project.pendingInterventions.filter(p => p.id !== interventionId);
   projectsStore.set(project.projectId, project);
   return res.json({ success: true, project });
+});
+
+// Live Sandbox Application Preview Handler
+app.get(['/api/projects/:id/preview', '/api/projects/:id/preview/*'], async (req: Request, res: Response) => {
+  const projectId = req.params.id;
+  const project = projectsStore.get(projectId);
+  const wsRoot = getWorkspacePath(projectId);
+
+  if (!fs.existsSync(wsRoot)) {
+    return res.status(404).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Sandbox Initializing</title></head>
+        <body style="background:#09090b;color:#f4f4f5;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+          <div style="text-align:center;padding:24px;background:#18181b;border-radius:12px;border:1px solid #27272a;max-width:480px;">
+            <h2 style="color:#06b6d4;margin-top:0;">Sandbox Initializing</h2>
+            <p style="color:#a1a1aa;font-size:14px;">The workspace for this project is being created on disk...</p>
+          </div>
+        </body>
+      </html>
+    `);
+  }
+
+  // Extract relative subpath within preview
+  const originalUrl = req.originalUrl || req.url;
+  const prefix = `/api/projects/${projectId}/preview`;
+  let subPath = originalUrl.slice(prefix.length).split('?')[0];
+  if (!subPath || subPath === '/' || subPath === '') {
+    subPath = '/index.html';
+  }
+
+  const cleanSubPath = subPath.replace(/^\/+/, '');
+  
+  // Potential candidate paths in workspace
+  const candidatePaths = [
+    path.join(wsRoot, cleanSubPath),
+    path.join(wsRoot, 'public', cleanSubPath),
+    path.join(wsRoot, 'src', cleanSubPath),
+    path.join(wsRoot, 'dist', cleanSubPath),
+  ];
+
+  for (const full of candidatePaths) {
+    if (fs.existsSync(full) && fs.statSync(full).isFile()) {
+      return res.sendFile(full);
+    }
+  }
+
+  // If requesting root/index.html and specific file not found, try any .html file in workspace
+  if (cleanSubPath === 'index.html' || cleanSubPath === '') {
+    const wsFiles = await listWorkspaceFiles(projectId);
+    const htmlFile = wsFiles.find(f => f.path.endsWith('.html') || f.path === 'index.html');
+    if (htmlFile) {
+      const full = path.join(wsRoot, htmlFile.path);
+      if (fs.existsSync(full)) {
+        return res.sendFile(full);
+      }
+    }
+
+    // If no HTML exists yet, render a rich live compiling view
+    return res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${project?.name || 'Workspace Preview'}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #070707; color: #f4f4f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+            .card { background: #0e0e0e; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 32px; max-width: 540px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.6); text-align: center; }
+            .badge { display: inline-block; background: rgba(6,182,212,0.15); color: #22d3ee; font-family: monospace; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(6,182,212,0.3); margin-bottom: 16px; }
+            h2 { font-size: 20px; font-weight: 700; margin: 0 0 8px 0; color: #ffffff; }
+            p { color: #888888; font-size: 13px; line-height: 1.5; margin: 0 0 20px 0; }
+            .meta { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 12px; text-align: left; font-family: monospace; font-size: 11px; margin-bottom: 20px; }
+            .meta-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+            .meta-row:last-child { margin-bottom: 0; }
+            .meta-label { color: #666666; }
+            .meta-val { color: #22d3ee; font-weight: bold; }
+            .spinner { width: 24px; height: 24px; border: 2px solid rgba(6,182,212,0.2); border-top-color: #06b6d4; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+            @keyframes spin { to { transform: rotate(360deg); } }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="badge">AUTONOMOUS ARTIFACT RUNTIME</div>
+            <h2>${project?.name || 'Synthesizing Application'}</h2>
+            <p>The autonomous agent is currently writing source code files to the workspace. Once the HTML entry point is compiled, the live interactive preview will mount here.</p>
+            <div class="meta">
+              <div class="meta-row"><span class="meta-label">OBJECTIVE:</span><span class="meta-val">${(project?.originalUserPrompt || '').slice(0, 40)}...</span></div>
+              <div class="meta-row"><span class="meta-label">FILES WRITTEN:</span><span class="meta-val">${wsFiles.length} files</span></div>
+              <div class="meta-row"><span class="meta-label">STATUS:</span><span class="meta-val">${project?.status || 'EXECUTING'}</span></div>
+            </div>
+            <div class="spinner"></div>
+          </div>
+        </body>
+      </html>
+    `);
+  }
+
+  return res.status(404).send('File not found in workspace: ' + cleanSubPath);
 });
 
 // Production and dev server mounting

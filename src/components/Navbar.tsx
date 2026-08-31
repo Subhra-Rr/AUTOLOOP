@@ -16,14 +16,17 @@ import {
   FileCheck2,
   Wrench,
   LineChart,
-  GitFork
+  GitFork,
+  ExternalLink
 } from 'lucide-react';
 import { ProjectState } from '../types';
 
+export type ActiveTabType = 'preview' | 'workspace' | 'code' | 'repair' | 'security' | 'evaluation' | 'dod' | 'timeline';
+
 interface NavbarProps {
   project: ProjectState | null;
-  activeTab: 'workspace' | 'code' | 'repair' | 'security' | 'evaluation' | 'dod' | 'timeline';
-  onTabChange: (tab: 'workspace' | 'code' | 'repair' | 'security' | 'evaluation' | 'dod' | 'timeline') => void;
+  activeTab: ActiveTabType;
+  onTabChange: (tab: ActiveTabType) => void;
   isRunning: boolean;
   onToggleRun: () => void;
   onPause: () => void;
@@ -132,6 +135,19 @@ export function Navbar({
       {/* Center Navigation Tabs */}
       {project && (
         <nav className="hidden xl:flex items-center space-x-1 bg-[#0a0a0a]/60 p-1 rounded-lg border border-white/10 backdrop-blur-sm">
+          {/* Real Live App Preview Tab */}
+          <button
+            onClick={() => onTabChange('preview')}
+            className={`flex items-center space-x-1.5 px-3 py-1 rounded text-[10px] font-mono font-bold uppercase tracking-wider transition-all ${
+              activeTab === 'preview' 
+                ? 'bg-cyan-500 text-black shadow-[0_0_12px_rgba(6,182,212,0.4)]' 
+                : 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20'
+            }`}
+          >
+            <Play className="w-3 h-3" />
+            <span>Live Preview</span>
+          </button>
+
           <button
             onClick={() => onTabChange('workspace')}
             className={`flex items-center space-x-1.5 px-3 py-1 rounded text-[10px] font-mono font-bold uppercase tracking-wider transition-all ${
@@ -152,7 +168,7 @@ export function Navbar({
             }`}
           >
             <Code2 className="w-3 h-3" />
-            <span>Code & Diffs</span>
+            <span>Code ({project.files.length})</span>
           </button>
           <button
             onClick={() => onTabChange('repair')}
@@ -164,9 +180,9 @@ export function Navbar({
           >
             <Wrench className="w-3 h-3" />
             <span>Repair</span>
-            {project.metrics.repairCyclesCount > 0 && (
+            {project.repairHistory.length > 0 && (
               <span className="ml-1 px-1 rounded bg-amber-500 text-black text-[9px] font-bold">
-                {project.metrics.repairCyclesCount}
+                {project.repairHistory.length}
               </span>
             )}
           </button>
@@ -190,7 +206,7 @@ export function Navbar({
             }`}
           >
             <LineChart className="w-3 h-3" />
-            <span>AI Quality ({project.evaluation.overallScore}%)</span>
+            <span>Metrics</span>
           </button>
           <button
             onClick={() => onTabChange('dod')}
@@ -201,134 +217,68 @@ export function Navbar({
             }`}
           >
             <FileCheck2 className="w-3 h-3" />
-            <span>DoD (9/9)</span>
+            <span>DoD Contract</span>
           </button>
         </nav>
       )}
 
       {/* Right Controls & Telemetry */}
-      <div className="flex items-center space-x-4 sm:space-x-6">
-        {project && (
-          <div className="hidden sm:flex space-x-4 text-[10px] font-mono">
-            <div className="text-right">
-              <p className="text-white/40 uppercase tracking-widest">RUNTIME</p>
-              <p className="text-white font-semibold">{formatTime(project.elapsedSeconds)}</p>
+      <div className="flex items-center space-x-3">
+        {project ? (
+          <>
+            {/* Live Telemetry Chips */}
+            <div className="hidden sm:flex items-center space-x-2 text-[10px] font-mono">
+              <div className="flex items-center space-x-1 px-2 py-1 rounded bg-black/40 border border-white/5 text-white/70">
+                <Clock className="w-3 h-3 text-cyan-400" />
+                <span>{formatTime(project.elapsedSeconds)}</span>
+              </div>
+              <div className="flex items-center space-x-1 px-2 py-1 rounded bg-black/40 border border-white/5 text-white/70">
+                <Cpu className="w-3 h-3 text-cyan-400" />
+                <span>{project.tokensUsed} TOKENS</span>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-white/40 uppercase tracking-widest">COMPUTE</p>
-              <p className="text-white font-semibold">
-                {(project.tokensUsed / 1000).toFixed(1)}k TKN
-              </p>
-            </div>
-          </div>
-        )}
 
-        {project && (
-          <div className="flex items-center space-x-2">
-            {project.status === 'COMPLETED' ? (
+            {/* Loop Actions */}
+            <div className="flex items-center space-x-1.5 pl-2 border-l border-white/10">
+              {isRunning ? (
+                <button
+                  onClick={onPause}
+                  title="Pause autonomous loop"
+                  className="flex items-center space-x-1 px-2.5 py-1 rounded bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-xs font-mono transition-colors"
+                >
+                  <Pause className="w-3.5 h-3.5" />
+                  <span className="hidden md:inline">PAUSE</span>
+                </button>
+              ) : project.status !== 'COMPLETED' ? (
+                <button
+                  onClick={onResume}
+                  title="Resume autonomous execution"
+                  className="flex items-center space-x-1 px-2.5 py-1 rounded bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-mono font-bold shadow-[0_0_10px_rgba(6,182,212,0.4)] transition-all"
+                >
+                  <Play className="w-3.5 h-3.5" />
+                  <span className="hidden md:inline">RESUME</span>
+                </button>
+              ) : null}
+
               <button
                 onClick={onReset}
-                className="bg-green-500/20 hover:bg-green-500/30 text-green-400 px-3 py-1.5 rounded text-[10px] font-bold border border-green-500/30 flex items-center space-x-1.5 transition-colors"
+                title="Start new project objective"
+                className="flex items-center space-x-1 px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 text-xs font-mono transition-colors"
               >
-                <RotateCcw className="w-3 h-3" />
-                <span>NEW</span>
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">NEW</span>
               </button>
-            ) : project.status === 'PAUSED' ? (
-              <button
-                onClick={onResume}
-                className="bg-green-500 hover:bg-green-400 text-black px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center space-x-1.5 transition-colors shadow-[0_0_10px_rgba(34,197,94,0.4)]"
-              >
-                <Play className="w-3 h-3 fill-black" />
-                <span>RESUME</span>
-              </button>
-            ) : isRunning ? (
-              <button
-                onClick={onPause}
-                className="bg-white/5 hover:bg-white/10 text-white/90 px-3 py-1.5 rounded text-[10px] font-bold border border-white/10 flex items-center space-x-1.5 transition-colors"
-              >
-                <Pause className="w-3 h-3" />
-                <span>PAUSE</span>
-              </button>
-            ) : (
-              <button
-                onClick={onToggleRun}
-                className="bg-cyan-500 hover:bg-cyan-400 text-black px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center space-x-1.5 transition-colors shadow-[0_0_15px_rgba(6,182,212,0.4)]"
-              >
-                <Play className="w-3 h-3 fill-black" />
-                <span>AUTO RUN</span>
-              </button>
-            )}
-
-            <button
-              onClick={onAbort}
-              title="Abort execution"
-              className="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1.5 rounded text-[10px] font-bold border border-red-500/30 transition-colors"
-            >
-              STOP
-            </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1.5 px-3 py-1 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span>AWAITING USER PROMPT</span>
+            </div>
           </div>
         )}
       </div>
-
-      {/* Mobile Tab Bar */}
-      {project && (
-        <div className="xl:hidden absolute top-14 left-0 right-0 flex items-center space-x-1 px-4 py-2 overflow-x-auto border-b border-white/10 bg-[#0a0a0a]/95 backdrop-blur-md">
-          <button
-            onClick={() => onTabChange('workspace')}
-            className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-mono font-bold uppercase whitespace-nowrap transition-colors ${
-              activeTab === 'workspace' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-white/60'
-            }`}
-          >
-            <Terminal className="w-3 h-3" />
-            <span>Workspace</span>
-          </button>
-          <button
-            onClick={() => onTabChange('code')}
-            className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-mono font-bold uppercase whitespace-nowrap transition-colors ${
-              activeTab === 'code' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-white/60'
-            }`}
-          >
-            <Code2 className="w-3 h-3" />
-            <span>Code</span>
-          </button>
-          <button
-            onClick={() => onTabChange('repair')}
-            className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-mono font-bold uppercase whitespace-nowrap transition-colors ${
-              activeTab === 'repair' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'text-white/60'
-            }`}
-          >
-            <Wrench className="w-3 h-3" />
-            <span>Repair ({project.metrics.repairCyclesCount})</span>
-          </button>
-          <button
-            onClick={() => onTabChange('security')}
-            className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-mono font-bold uppercase whitespace-nowrap transition-colors ${
-              activeTab === 'security' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'text-white/60'
-            }`}
-          >
-            <ShieldCheck className="w-3 h-3" />
-            <span>Security</span>
-          </button>
-          <button
-            onClick={() => onTabChange('evaluation')}
-            className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-mono font-bold uppercase whitespace-nowrap transition-colors ${
-              activeTab === 'evaluation' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-white/60'
-            }`}
-          >
-            <LineChart className="w-3 h-3" />
-            <span>Quality</span>
-          </button>
-          <button
-            onClick={() => onTabChange('dod')}
-            className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-mono font-bold uppercase whitespace-nowrap transition-colors ${
-              activeTab === 'dod' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-white/60'
-            }`}
-          >
-            <FileCheck2 className="w-3 h-3" />
-            <span>DoD</span>
-          </button>
-        </div>
-      )}
     </header>
   );
 }

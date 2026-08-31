@@ -6,10 +6,12 @@ import {
   Download, 
   RotateCcw, 
   ShieldCheck, 
-  Terminal, 
+  ExternalLink, 
   Code2, 
   FileCheck2,
-  X
+  X,
+  Play,
+  Layers
 } from 'lucide-react';
 import { ProjectState } from '../types';
 
@@ -18,19 +20,21 @@ interface CompletionReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onRestart: () => void;
+  onViewLivePreview?: () => void;
 }
 
 export function CompletionReportModal({
   project,
   isOpen,
   onClose,
-  onRestart
+  onRestart,
+  onViewLivePreview
 }: CompletionReportModalProps) {
   useEffect(() => {
     if (isOpen) {
       confetti({
-        particleCount: 80,
-        spread: 70,
+        particleCount: 70,
+        spread: 60,
         origin: { y: 0.6 }
       });
     }
@@ -38,20 +42,26 @@ export function CompletionReportModal({
 
   if (!isOpen) return null;
 
+  const passedDodCount = project.definitionOfDone.filter(d => d.status === 'PASSED').length;
+  const totalDodCount = project.definitionOfDone.length;
+  const hasTests = project.testCases.length > 0;
+  const previewUrl = `/api/projects/${project.projectId}/preview`;
+
   const handleExportFullReport = () => {
     const report = {
       project: project.name,
-      objective: project.objective,
+      objective: project.originalUserPrompt,
       status: project.status,
       completedAt: project.completedAt,
       elapsedSeconds: project.elapsedSeconds,
       tokensUsed: project.tokensUsed,
+      computeSeconds: project.computeSeconds,
       metrics: project.metrics,
       evaluation: project.evaluation,
       definitionOfDone: project.definitionOfDone,
       repairCycles: project.repairHistory,
       auditLogs: project.auditLogs,
-      filesGenerated: project.files.map(f => ({ path: f.path, lines: f.content.split('\n').length }))
+      filesGenerated: project.files.map(f => ({ path: f.path, lines: f.content ? f.content.split('\n').length : 0 }))
     };
 
     const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
@@ -78,7 +88,7 @@ export function CompletionReportModal({
             <div>
               <div className="inline-flex items-center space-x-1 text-[10px] font-mono font-bold text-green-400 tracking-wider">
                 <Sparkles className="w-3 h-3" />
-                <span>AUTONOMOUS LOOP COMPLETE</span>
+                <span>AUTONOMOUS BUILD COMPLETE</span>
               </div>
               <h2 className="text-lg font-bold font-mono text-white mt-0.5">
                 {project.name}
@@ -93,85 +103,89 @@ export function CompletionReportModal({
           </button>
         </div>
 
-        {/* Executive Summary Metrics Grid */}
+        {/* Real User Prompt Objective Quote */}
+        <div className="p-3 rounded-lg bg-black/50 border border-white/5 space-y-1">
+          <div className="text-[10px] font-mono text-cyan-400/80 uppercase tracking-wider">
+            USER OBJECTIVE REALIZED:
+          </div>
+          <p className="text-xs text-white/90 font-sans italic">
+            "{project.originalUserPrompt}"
+          </p>
+        </div>
+
+        {/* Executive Summary Real Metrics Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-mono">
           <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 text-center">
-            <span className="text-[9px] text-white/40 uppercase tracking-wider">TASKS PASSED</span>
+            <span className="text-[9px] text-white/40 uppercase tracking-wider">TASKS COMPLETED</span>
             <p className="text-base font-bold text-white mt-0.5">
               {project.metrics.completedTasks}/{project.tasks.length}
             </p>
           </div>
           <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 text-center">
-            <span className="text-[9px] text-white/40 uppercase tracking-wider">TESTS GREEN</span>
-            <p className="text-base font-bold text-green-400 mt-0.5">
-              {project.metrics.passingTests}/{project.testCases.length}
-            </p>
-          </div>
-          <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 text-center">
-            <span className="text-[9px] text-white/40 uppercase tracking-wider">DOD CRITERIA</span>
+            <span className="text-[9px] text-white/40 uppercase tracking-wider">FILES ON DISK</span>
             <p className="text-base font-bold text-cyan-400 mt-0.5">
-              9/9 PASSED
+              {project.files.length} Files
             </p>
           </div>
           <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 text-center">
-            <span className="text-[9px] text-white/40 uppercase tracking-wider">QUALITY SCORE</span>
+            <span className="text-[9px] text-white/40 uppercase tracking-wider">TEST RUNNER</span>
+            <p className="text-base font-bold text-green-400 mt-0.5">
+              {hasTests ? `${project.metrics.passingTests}/${project.testCases.length}` : 'Syntax OK'}
+            </p>
+          </div>
+          <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 text-center">
+            <span className="text-[9px] text-white/40 uppercase tracking-wider">DOD GATES</span>
             <p className="text-base font-bold text-blue-400 mt-0.5">
-              {project.evaluation.overallScore}%
+              {passedDodCount}/{totalDodCount} Passed
             </p>
           </div>
         </div>
 
-        {/* Verification Seals */}
-        <div className="space-y-2 p-3.5 rounded-lg bg-black/40 border border-white/5 text-[11px] font-mono text-white/70">
-          <div className="flex items-center justify-between text-white/40 pb-2 border-b border-white/5 text-[10px]">
-            <span>VERIFICATION ARTIFACTS</span>
-            <span>ZERO-TRUST SIGN-OFF</span>
+        {/* Real Live Artifact Callout */}
+        <div className="p-3.5 rounded-lg bg-gradient-to-r from-cyan-950/30 to-blue-950/30 border border-cyan-500/30 flex items-center justify-between gap-4">
+          <div className="space-y-0.5">
+            <div className="flex items-center space-x-1.5 text-xs font-mono font-bold text-cyan-400">
+              <Play className="w-3.5 h-3.5" />
+              <span>LIVE APPLICATION ARTIFACT READY</span>
+            </div>
+            <p className="text-[11px] text-white/60">
+              The real application is compiled and serving on the sandbox proxy.
+            </p>
           </div>
-          <div className="space-y-1.5 pt-0.5">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center space-x-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
-                <span>Zero-Trust Sandbox Boundary Audit</span>
-              </span>
-              <span className="text-green-400 font-bold">0 Violations</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center space-x-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
-                <span>Automated Failure & Self-Repair Cycles</span>
-              </span>
-              <span className="text-cyan-400 font-bold">{project.repairHistory.length} Cycles Resolved</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center space-x-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
-                <span>TypeScript Strict Compilation</span>
-              </span>
-              <span className="text-green-400 font-bold">0 Errors</span>
-            </div>
-          </div>
+          <a
+            href={previewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-mono font-bold transition-all shadow-[0_0_12px_rgba(6,182,212,0.3)] shrink-0"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>OPEN LIVE APP</span>
+          </a>
         </div>
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
           <button
             onClick={handleExportFullReport}
-            className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 rounded bg-white/5 hover:bg-white/10 text-white/80 text-xs font-semibold border border-white/10 transition-colors font-mono"
+            className="w-full sm:w-auto flex items-center justify-center space-x-2 px-3.5 py-2 rounded bg-white/5 hover:bg-white/10 text-white/80 text-xs font-semibold border border-white/10 transition-colors font-mono"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>EXPORT AUDIT REPORT (JSON)</span>
+            <span>EXPORT JSON REPORT</span>
           </button>
 
           <div className="flex items-center space-x-2 w-full sm:w-auto">
             <button
-              onClick={onClose}
-              className="flex-1 sm:flex-none px-4 py-2 rounded bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition-colors font-mono"
+              onClick={() => {
+                onClose();
+                if (onViewLivePreview) onViewLivePreview();
+              }}
+              className="flex-1 sm:flex-none px-3.5 py-2 rounded bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors font-mono"
             >
-              INSPECT WORKSPACE
+              VIEW LIVE PREVIEW
             </button>
             <button
               onClick={onRestart}
-              className="flex-1 sm:flex-none flex items-center justify-center space-x-1.5 px-4 py-2 rounded bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all font-mono"
+              className="flex-1 sm:flex-none flex items-center justify-center space-x-1.5 px-3.5 py-2 rounded bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all font-mono"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>NEW OBJECTIVE</span>

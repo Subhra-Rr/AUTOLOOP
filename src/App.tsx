@@ -5,12 +5,13 @@ import {
   PipelineNodeId, 
   HumanInterventionRequest 
 } from './types';
-import { Navbar } from './components/Navbar';
+import { Navbar, ActiveTabType } from './components/Navbar';
 import { LandingPage } from './components/LandingPage';
 import { PipelineGraph } from './components/PipelineGraph';
 import { TaskHierarchy } from './components/TaskHierarchy';
 import { LiveTerminal } from './components/LiveTerminal';
 import { CodeViewer } from './components/CodeViewer';
+import { LivePreview } from './components/LivePreview';
 import { TestRepairHub } from './components/TestRepairHub';
 import { SecurityCenter } from './components/SecurityCenter';
 import { EvaluationMetrics } from './components/EvaluationMetrics';
@@ -20,7 +21,7 @@ import { HumanInterventionModal } from './components/HumanInterventionModal';
 
 export function App() {
   const [project, setProject] = useState<ProjectState | null>(null);
-  const [activeTab, setActiveTab] = useState<'workspace' | 'code' | 'repair' | 'security' | 'evaluation' | 'dod' | 'timeline'>('workspace');
+  const [activeTab, setActiveTab] = useState<ActiveTabType>('workspace');
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [activeFilePath, setActiveFilePath] = useState<string>('src/index.js');
@@ -210,6 +211,10 @@ export function App() {
           <PipelineGraph project={project} onSelectNode={handleSelectNode} />
 
           {/* Tab Views */}
+          {activeTab === 'preview' && (
+            <LivePreview project={project} />
+          )}
+
           {activeTab === 'workspace' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[620px]">
               {/* Left Task Hierarchy (5 cols) */}
@@ -288,6 +293,7 @@ export function App() {
           isOpen={showCompletionModal}
           onClose={() => setShowCompletionModal(false)}
           onRestart={handleReset}
+          onViewLivePreview={() => setActiveTab('preview')}
         />
       )}
 

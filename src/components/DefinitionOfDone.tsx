@@ -29,7 +29,7 @@ export function DefinitionOfDone({ project }: DefinitionOfDoneProps) {
             </h3>
           </div>
           <p className="text-[11px] text-white/50 max-w-xl font-sans">
-            Strict multi-gate criteria. The autonomous engine is prohibited from declaring project completion until all 9 verification standards are mathematically satisfied.
+            Strict multi-gate criteria. The autonomous engine is prohibited from declaring project completion until all physical workspace verification standards are satisfied.
           </p>
         </div>
 

@@ -279,10 +279,10 @@ export function TestRepairHub({ project }: TestRepairHubProps) {
               <div className="p-2.5 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-xs flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
-                  <span className="text-[11px]">Regression Test Suite: <strong>9/9 PASSING</strong></span>
+                  <span className="text-[11px]">Test Suite Status: <strong>{passCount}/{project.testCases.length} PASSING</strong></span>
                 </div>
                 <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30">
-                  REPAIR RESOLVED
+                  {activeRepair.status}
                 </span>
               </div>
             </div>

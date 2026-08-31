@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Sparkles, 
   ArrowRight, 
@@ -12,45 +12,64 @@ import {
   Code2, 
   Terminal,
   Zap,
-  GraduationCap,
-  Activity,
-  CreditCard,
   Lock
 } from 'lucide-react';
 import { AutonomyMode } from '../types';
-import { PROJECT_TEMPLATES } from '../data/templates';
 
 interface LandingPageProps {
   onStartBuild: (prompt: string, mode: AutonomyMode) => void;
 }
+
+const PROMPT_SUGGESTIONS = [
+  {
+    title: 'Grievance Redressal Portal',
+    desc: 'Full-stack platform with student complaints, status tracking, analytics dashboard, and Node tests.',
+    prompt: 'Build a full-stack student grievance management portal with interactive dashboard, complaint submission, status lifecycle tracking, responsive modern UI, and automated Node.js test cases.'
+  },
+  {
+    title: 'Collaborative Whiteboard Canvas',
+    desc: 'Real-time HTML5 drawing canvas with shape tools, color palette, undo/redo stack, and unit tests.',
+    prompt: 'Build an interactive web-based drawing canvas application with freehand drawing, geometric shapes, color picker, brush sizes, undo/redo history, export to PNG, and test coverage.'
+  },
+  {
+    title: 'Fintech Expense & Budget Engine',
+    desc: 'Double-entry expense tracker with category budgets, financial analytics charts, and test suite.',
+    prompt: 'Build a personal finance and expense tracker web app with transaction tagging, monthly budget gauges, category breakdown visualizer, localStorage persistence, and unit test suite.'
+  },
+  {
+    title: 'Scientific Calculator & Grapher',
+    desc: 'Mathematical evaluation engine with function plotting, history tape, and arithmetic tests.',
+    prompt: 'Build a scientific graphing calculator web app with trigonometric functions, equation plotting on canvas, calculation history, responsive keypads, and test assertions.'
+  }
+];
 
 export function LandingPage({ onStartBuild }: LandingPageProps) {
   const [prompt, setPrompt] = useState('');
   const [selectedMode, setSelectedMode] = useState<AutonomyMode>('MAXIMUM');
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const steps = [
-    { label: 'GOAL', icon: Sparkles, desc: 'User prompt parsed' },
-    { label: 'PLAN', icon: Workflow, desc: 'Real task decomposition' },
+  const steps逗 = [
+    { label: 'GOAL', icon: Sparkles, desc: 'Real user prompt parsed' },
+    { label: 'PLAN', icon: Workflow, desc: 'Dynamic task decomposition' },
     { label: 'BUILD', icon: Code2, desc: 'Zero-trust workspace synthesis' },
     { label: 'TEST', icon: Terminal, desc: 'Node.js test execution' },
-    { label: 'REPAIR', icon: Wrench, desc: 'Automated failure diagnosis' },
-    { label: 'VERIFY', icon: ShieldCheck, desc: '9/9 DoD criteria audit' },
-    { label: 'DONE', icon: CheckCircle2, desc: 'Production artifact ready' },
+    { label: 'REPAIR', icon: Wrench, desc: 'Automated self-healing cycles' },
+    { label: 'VERIFY', icon: ShieldCheck, desc: 'Physical disk verification' },
+    { label: 'DONE', icon: CheckCircle2, desc: 'Live running application' },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit不易 = (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt.trim()) {
-      setValidationError('Enter a task before starting the autonomous agent.');
+      setValidationError('Please describe what you want the autonomous agent to build before launching.');
       return;
     }
     setValidationError(null);
     onStartBuild(prompt.trim(), selectedMode);
   };
 
-  const handleSelectTemplate = (templatePrompt: string) => {
-    setPrompt(templatePrompt);
+  const handleSelectSuggestion = (suggestionPrompt: string) => {
+    setPrompt(suggestionPrompt);
     setValidationError(null);
   };
 
@@ -65,19 +84,19 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[11px] font-mono shadow-[0_0_10px_rgba(6,182,212,0.2)]">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
-            <span>AUTONOMOUS AI SOFTWARE ENGINEERING PLATFORM</span>
+            <span>AUTONOMOUS AI SOFTWARE ENGINEERING ENGINE</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-white leading-tight font-sans">
-            One Prompt. <br className="hidden sm:inline" />
+            One Objective. <br className="hidden sm:inline" />
             <span className="text-cyan-400">
-              Infinite Execution.
+              Autonomous Loop.
             </span> <br />
-            Verified Completion.
+            Real Verified Output.
           </h1>
 
           <p className="text-sm sm:text-base text-white/60 max-w-2xl mx-auto leading-relaxed">
-            Give AI one goal. Let it finish the work. AUTOLOOP plans, builds, tests, repairs, and verifies your project without requiring you to continuously prompt it.
+            Specify any software application. AUTOLOOP writes real files to an isolated sandbox on disk, runs automated Node test suites, self-repairs failures, and produces a live preview.
           </p>
         </div>
 
@@ -86,64 +105,66 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] font-mono uppercase tracking-widest text-white/50 flex items-center space-x-2">
               <Zap className="w-3 h-3 text-cyan-400" />
-              <span>AUTONOMOUS_PIPELINE_FLOW</span>
+              <span>AUTONOMOUS_EXECUTION_LIFECYCLE</span>
             </span>
-            <span className="text-[10px] font-mono text-white/40">
-              STATUS: IDLE (AWAITING USER PROMPT)
+            <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+              STATUS: IDLE — AWAITING USER INPUT
             </span>
           </div>
 
           {/* Node to node pipeline */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 relative">
-            {steps.map((step, idx) => {
+            {steps逗.map((step) => {
               const Icon = step.icon;
 
               return (
                 <div
                   key={step.label}
-                  className="relative p-3 rounded-lg border border-white/5 bg-black/40 text-white/50 flex flex-col items-center text-center transition-all hover:border-cyan-500/30"
+                  className="p-3 rounded-lg bg-[#050505] border border-white/5 space-y-1.5 transition-all text-center group hover:border-cyan-500/30"
                 >
-                  <div className="w-7 h-7 rounded flex items-center justify-center mb-1.5 bg-white/5 text-cyan-400">
+                  <div className="w-7 h-7 rounded-md flex items-center justify-center mx-auto bg-white/5 text-white/50 group-hover:text-cyan-400 group-hover:bg-cyan-500/10 transition-colors">
                     <Icon className="w-3.5 h-3.5" />
                   </div>
-                  <span className="text-[10px] font-mono font-bold tracking-wider text-white/70">
+                  <span className="text-[10px] font-mono font-bold block text-white/70">
                     {step.label}
                   </span>
-                  <span className="text-[9px] text-white/40 mt-1 line-clamp-1 font-mono">
+                  <p className="text-[9px] text-white/40 leading-tight">
                     {step.desc}
-                  </span>
-
-                  {/* Flow Arrow indicator */}
-                  {idx < steps.length - 1 && (
-                    <div className="hidden lg:block absolute -right-2 top-1/2 -translate-y-1/2 z-10 text-white/20 text-xs">
-                      →
-                    </div>
-                  )}
+                  </p>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Input & Autonomy Mode Form */}
-        <div className="p-6 sm:p-7 rounded-lg bg-[#0a0a0a]/70 border border-white/10 backdrop-blur-md shadow-2xl space-y-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {validationError && (
-              <div className="p-3 rounded bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-mono flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-                <span>{validationError}</span>
-              </div>
-            )}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-mono font-bold uppercase tracking-wider text-white/80 flex items-center space-x-2">
-                  <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>WHAT DO YOU WANT TO BUILD AUTONOMOUSLY?</span>
+        {/* Real User Prompt Form */}
+        <div className="p-6 sm:p-8 rounded-lg bg-[#0a0a0a]/80 border border-white/10 backdrop-blur-xl shadow-2xl space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+              <h2 className="text-sm font-mono uppercase tracking-widest text-white/90 font-bold">
+                DEFINE APPLICATION OBJECTIVE
+              </h2>
+            </div>
+            <span className="text-[10px] font-mono text-white/40">
+              ZERO-TRUST WORKSPACE ISOLATION
+            </span>
+          </div>
+
+          <form onSubmit={handleSubmit不易} className="space-y-5">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-mono uppercase tracking-wider text-white/50 flex items-center space-x-1.5">
+                  <Sparkles className="w-3 h-3 text-cyan-400" />
+                  <span>PROJECT GOAL & REQUIREMENTS</span>
                 </label>
-                <span className="text-[10px] font-mono text-white/40">
-                  ONE PROMPT STARTS ENGINE
-                </span>
+                {validationError && (
+                  <span className="text-[10px] font-mono text-red-400">
+                    {validationError}
+                  </span>
+                )}
               </div>
+
               <textarea
                 value={prompt}
                 onChange={(e) => {
@@ -151,7 +172,7 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
                   if (validationError) setValidationError(null);
                 }}
                 rows={3}
-                placeholder="Describe your project goal, e.g. Build an autonomous grievance management portal with JWT auth, Postgres schema, Zod validation, and automated testing..."
+                placeholder="Describe what you want to build (e.g. Build an interactive student grievance platform with complaint filtering, priority tags, status updates, and automated test cases...)"
                 className="w-full p-3.5 rounded bg-[#050505] border border-white/10 text-white placeholder-white/30 font-mono text-xs focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all resize-y"
               />
             </div>
@@ -160,7 +181,7 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
             <div className="space-y-2">
               <label className="text-[10px] font-mono uppercase tracking-wider text-white/50 flex items-center space-x-1.5">
                 <ShieldCheck className="w-3 h-3 text-cyan-400" />
-                <span>AUTONOMY EXECUTION POLICY</span>
+                <span>AUTONOMY SUPERVISION POLICY</span>
               </label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div
@@ -176,7 +197,7 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
                     <span>MAXIMUM AUTONOMY</span>
                   </div>
                   <p className="text-[10px] text-white/50 mt-1 leading-relaxed">
-                    Zero interruptions. System handles all planning, code generation, error repair, and verification.
+                    Continuous loop. The agent plans, writes source code, runs automated tests, heals failures, and verifies completion.
                   </p>
                 </div>
 
@@ -190,10 +211,10 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
                 >
                   <div className="flex items-center space-x-2 font-bold text-xs text-blue-400 font-mono">
                     <ShieldCheck className="w-3 h-3" />
-                    <span>BALANCED AUTONOMY</span>
+                    <span>BALANCED SUPERVISION</span>
                   </div>
                   <p className="text-[10px] text-white/50 mt-1 leading-relaxed">
-                    Auto-executes standard tasks. Requests human approval only for high-risk operations.
+                    Auto-executes safe file writes and test runs. Asks for confirmation before high-impact actions.
                   </p>
                 </div>
 
@@ -207,34 +228,34 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
                 >
                   <div className="flex items-center space-x-2 font-bold text-xs text-amber-400 font-mono">
                     <Lock className="w-3 h-3" />
-                    <span>HUMAN APPROVAL GATES</span>
+                    <span>STRICT SUPERVISOR</span>
                   </div>
                   <p className="text-[10px] text-white/50 mt-1 leading-relaxed">
-                    Strict supervisor mode. Approvals required before major package installs or schema migrations.
+                    Step-by-step supervisor gating. Requires explicit approval before each phase transition.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Quick Templates */}
+            {/* Quick Inspiration Prompts */}
             <div className="space-y-2">
               <label className="text-[10px] font-mono uppercase tracking-wider text-white/40">
-                OR CHOOSE A REFERENCE ARCHITECTURE:
+                OR SELECT AN EXAMPLE OBJECTIVE:
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                {PROJECT_TEMPLATES.map((tmpl) => (
+                {PROMPT_SUGGESTIONS.map((item, idx) => (
                   <button
-                    key={tmpl.id}
+                    key={idx}
                     type="button"
-                    onClick={() => handleSelectTemplate(tmpl.prompt)}
+                    onClick={() => handleSelectSuggestion(item.prompt)}
                     className="p-3 text-left rounded-lg bg-black/40 hover:bg-white/5 border border-white/5 hover:border-white/20 transition-all group"
                   >
                     <div className="text-xs font-semibold text-white/90 group-hover:text-cyan-400 transition-colors flex items-center justify-between font-mono">
-                      <span className="truncate">{tmpl.title}</span>
+                      <span className="truncate">{item.title}</span>
                       <ArrowRight className="w-3 h-3 text-white/30 group-hover:text-cyan-400 transition-transform group-hover:translate-x-0.5" />
                     </div>
                     <p className="text-[10px] text-white/40 mt-1 line-clamp-2">
-                      {tmpl.shortDesc}
+                      {item.desc}
                     </p>
                   </button>
                 ))}
@@ -246,15 +267,15 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
               <div className="flex items-center space-x-4 text-[10px] text-white/50 font-mono">
                 <span className="flex items-center space-x-1.5">
                   <CheckCircle2 className="w-3 h-3 text-green-400" />
-                  <span>ZERO_TRUST</span>
+                  <span>ZERO_MOCK_DATA</span>
                 </span>
                 <span className="flex items-center space-x-1.5">
                   <CheckCircle2 className="w-3 h-3 text-cyan-400" />
-                  <span>AUTO_REPAIR</span>
+                  <span>REAL_DISK_FILES</span>
                 </span>
                 <span className="flex items-center space-x-1.5">
                   <CheckCircle2 className="w-3 h-3 text-blue-400" />
-                  <span>9/9 DOD CHECK</span>
+                  <span>REAL_TEST_RUNNER</span>
                 </span>
               </div>
 
