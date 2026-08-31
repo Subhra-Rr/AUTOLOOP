@@ -12,7 +12,10 @@ import {
   File, 
   Code,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Search,
+  WrapText,
+  FileCheck2
 } from 'lucide-react';
 import { ProjectFile, ProjectState } from '../types';
 
@@ -26,6 +29,8 @@ export function CodeViewer({ project, activeFilePath, onSelectFile }: CodeViewer
   const [viewMode, setViewMode] = useState<'CODE' | 'DIFF'>('CODE');
   const [copied, setCopied] = useState(false);
   const [mobileFileListOpen, setMobileFileListOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [wrapLines, setWrapLines] = useState(false);
 
   const currentFile = project.files.find((f) => f.path === activeFilePath) || project.files[0];
 
@@ -51,6 +56,55 @@ export function CodeViewer({ project, activeFilePath, onSelectFile }: CodeViewer
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  // Basic syntax coloring helper
+  const renderHighlightedLine = (line: string) => {
+    if (!line) return ' ';
+
+    // Search term highlight
+    if (searchTerm.trim()) {
+      const parts = line.split(new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+      return parts.map((part, i) => 
+        part.toLowerCase() === searchTerm.toLowerCase() ? (
+          <mark key={i} className="bg-yellow-500/40 text-yellow-200 px-0.5 rounded font-bold">
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      );
+    }
+
+    // Keyword & tag coloring cues
+    if (line.trim().startsWith('//') || line.trim().startsWith('/*') || line.trim().startsWith('*')) {
+      return <span className="text-zinc-500 italic">{line}</span>;
+    }
+    if (line.includes('function ') || line.includes('const ') || line.includes('let ') || line.includes('export ') || line.includes('import ')) {
+      return (
+        <span>
+          {line.split(/(function|const|let|var|export|import|from|return|if|else|async|await)/g).map((chunk, idx) => {
+            if (['function', 'const', 'let', 'var', 'export', 'import', 'from', 'return', 'if', 'else', 'async', 'await'].includes(chunk)) {
+              return <span key={idx} className="text-cyan-400 font-semibold">{chunk}</span>;
+            }
+            if (chunk.includes('"') || chunk.includes("'") || chunk.includes('`')) {
+              return <span key={idx} className="text-emerald-300">{chunk}</span>;
+            }
+            return <span key={idx} className="text-zinc-200">{chunk}</span>;
+          })}
+        </span>
+      );
+    }
+    if (line.includes('<') && line.includes('>')) {
+      return <span className="text-amber-200/90">{line}</span>;
+    }
+
+    return <span className="text-zinc-200">{line}</span>;
+  };
+
+  const lines = currentFile ? currentFile.content.split('\n') : [];
+  const matchCount = searchTerm.trim() 
+    ? lines.filter(l => l.toLowerCase().includes(searchTerm.toLowerCase())).length 
+    : 0;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-full min-h-[500px]">
@@ -79,6 +133,7 @@ export function CodeViewer({ project, activeFilePath, onSelectFile }: CodeViewer
             project.files.map((file) => {
               const isSelected = file.path === activeFilePath;
               const hasPatch = project.repairHistory.some(r => r.patchDiff?.file === file.path);
+              const lineCount = file.content.split('\n').length;
 
               return (
                 <button
@@ -97,11 +152,16 @@ export function CodeViewer({ project, activeFilePath, onSelectFile }: CodeViewer
                     <FileCode2 className="w-3 h-3 shrink-0 text-white/30" />
                     <span className="truncate">{file.path}</span>
                   </div>
-                  {hasPatch && (
-                    <span className="px-1.5 py-0.2 rounded text-[8px] font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 shrink-0">
-                      PATCHED
+                  <div className="flex items-center space-x-1 shrink-0">
+                    <span className="text-[9px] text-white/30 font-mono">
+                      {lineCount}L
                     </span>
-                  )}
+                    {hasPatch && (
+                      <span className="px-1.5 py-0.2 rounded text-[8px] font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                        PATCHED
+                      </span>
+                    )}
+                  </div>
                 </button>
               );
             })
@@ -110,11 +170,11 @@ export function CodeViewer({ project, activeFilePath, onSelectFile }: CodeViewer
 
         <div className="p-2 rounded bg-black/40 border border-white/5 text-[10px] font-mono text-white/40 space-y-1 hidden lg:block mt-auto">
           <div className="flex items-center justify-between text-white/70 font-semibold">
-            <span>AST VALIDATOR</span>
-            <CheckCircle2 className="w-3 h-3 text-green-400" />
+            <span>REAL DISK FILES</span>
+            <FileCheck2 className="w-3.5 h-3.5 text-cyan-400" />
           </div>
           <p className="text-[9px] text-white/30">
-            Strict TypeScript compilation and syntax tree analysis active.
+            Written directly to isolated sandbox disk storage.
           </p>
         </div>
       </div>
@@ -128,12 +188,40 @@ export function CodeViewer({ project, activeFilePath, onSelectFile }: CodeViewer
             <span className="font-bold text-white text-[11px] truncate">{currentFile?.path || 'Select a file'}</span>
             {currentFile && (
               <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-white/50 uppercase shrink-0">
-                {currentFile.language}
+                {currentFile.language} ({lines.length} lines)
               </span>
             )}
           </div>
 
           <div className="flex items-center space-x-1.5 shrink-0 ml-auto">
+            {/* Quick Search */}
+            <div className="relative flex items-center">
+              <Search className="w-2.5 h-2.5 text-white/30 absolute left-2 pointer-events-none" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Find in file..."
+                className="pl-6 pr-2 py-0.5 bg-black/60 border border-white/10 rounded text-[10px] text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 w-24 sm:w-32"
+              />
+              {searchTerm.trim() && (
+                <span className="ml-1 text-[9px] text-cyan-400 font-mono">
+                  {matchCount} found
+                </span>
+              )}
+            </div>
+
+            {/* Line wrap toggle */}
+            <button
+              onClick={() => setWrapLines(!wrapLines)}
+              className={`p-1 sm:p-1.5 rounded border transition-colors ${
+                wrapLines ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' : 'bg-white/5 text-white/40 border-white/10 hover:text-white'
+              }`}
+              title="Toggle Line Wrap"
+            >
+              <WrapText className="w-3 h-3" />
+            </button>
+
             {/* View Mode Toggle */}
             {repairDiff && (
               <div className="flex items-center bg-black/40 p-0.5 rounded border border-white/10 text-[10px]">
@@ -221,13 +309,13 @@ export function CodeViewer({ project, activeFilePath, onSelectFile }: CodeViewer
             </div>
           ) : (
             <div className="relative overflow-x-auto">
-              {currentFile.content.split('\n').map((line, idx) => (
-                <div key={idx} className="flex hover:bg-white/5 px-1 py-0.5 rounded">
-                  <span className="text-white/30 select-none w-8 sm:w-10 text-right pr-2 sm:pr-4 text-[9px] sm:text-[10px] font-mono shrink-0">
+              {lines.map((line, idx) => (
+                <div key={idx} className="flex hover:bg-white/5 px-1 py-0.5 rounded group">
+                  <span className="text-white/30 select-none w-8 sm:w-10 text-right pr-2 sm:pr-4 text-[9px] sm:text-[10px] font-mono shrink-0 group-hover:text-cyan-400/70">
                     {idx + 1}
                   </span>
-                  <span className="text-white/80 flex-1 whitespace-pre font-mono">
-                    {line || ' '}
+                  <span className={`text-white/80 flex-1 font-mono ${wrapLines ? 'whitespace-pre-wrap break-all' : 'whitespace-pre'}`}>
+                    {renderHighlightedLine(line)}
                   </span>
                 </div>
               ))}
@@ -237,10 +325,11 @@ export function CodeViewer({ project, activeFilePath, onSelectFile }: CodeViewer
 
         {/* Editor Status bar */}
         <div className="h-7 px-3 bg-white/5 border-t border-white/5 text-[9px] text-white/40 flex items-center justify-between select-none">
-          <span className="truncate">{currentFile ? `UTF-8 • ${currentFile.language.toUpperCase()} • ${currentFile.content.split('\n').length} LINES` : 'EMPTY'}</span>
+          <span className="truncate">{currentFile ? `UTF-8 • ${currentFile.language.toUpperCase()} • ${lines.length} LINES • ${Math.round(currentFile.content.length / 1024 * 10) / 10} KB` : 'EMPTY'}</span>
           <span className="text-cyan-400 truncate ml-2">ZERO_TRUST_SANDBOX</span>
         </div>
       </div>
     </div>
   );
 }
+

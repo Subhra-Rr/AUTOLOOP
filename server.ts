@@ -232,6 +232,72 @@ app.get(['/api/projects/:id/preview', '/api/projects/:id/preview/*'], async (req
 
   const cleanSubPath = subPath.replace(/^\/+/, '');
   
+  // Helper to send HTML with base tag injected for bulletproof relative paths and telemetry bridge
+  const sendHtmlWithBase = async (filePath: string) => {
+    let content = await fs.promises.readFile(filePath, 'utf-8');
+    const baseTag = `<base href="/api/projects/${projectId}/preview/">`;
+    
+    const telemetryScript = `
+<script id="__autoloop_telemetry_bridge__">
+(function() {
+  // Bridge errors to parent window
+  window.addEventListener('error', function(e) {
+    try {
+      window.parent.postMessage({
+        type: 'AUTOLOOP_PREVIEW_LOG',
+        level: 'ERROR',
+        message: 'Runtime Error: ' + (e.message || e.error || 'Unknown script error'),
+        source: e.filename ? e.filename.split('/').pop() + ':' + e.lineno : 'inline'
+      }, '*');
+    } catch(err) {}
+  });
+
+  // Intercept button and control interactions
+  window.addEventListener('DOMContentLoaded', function() {
+    const interactables = document.querySelectorAll('button, input, select, textarea, [role="button"], a');
+    interactables.forEach(function(el) {
+      el.addEventListener('click', function() {
+        const text = (el.textContent || el.value || el.id || el.className || '').trim().slice(0, 30);
+        try {
+          window.parent.postMessage({
+            type: 'AUTOLOOP_PREVIEW_INTERACTION',
+            tagName: el.tagName,
+            label: text || 'Action Triggered',
+            timestamp: new Date().toLocaleTimeString()
+          }, '*');
+        } catch(err) {}
+      }, true);
+    });
+
+    // Notify parent window that preview DOM is ready and interactive
+    try {
+      window.parent.postMessage({
+        type: 'AUTOLOOP_PREVIEW_STATUS',
+        status: 'READY',
+        interactiveElementsCount: interactables.length
+      }, '*');
+    } catch(err) {}
+  });
+})();
+</script>
+`;
+
+    if (!content.includes('<base')) {
+      if (content.includes('<head>')) {
+        content = content.replace('<head>', `<head>\n  ${baseTag}\n  ${telemetryScript}`);
+      } else if (content.includes('<head ')) {
+        content = content.replace(/(<head[^>]*>)/i, `$1\n  ${baseTag}\n  ${telemetryScript}`);
+      } else {
+        content = `${baseTag}\n${telemetryScript}\n${content}`;
+      }
+    } else {
+      content = content.replace('</head>', `${telemetryScript}\n</head>`);
+    }
+    
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.send(content);
+  };
+
   // Potential candidate paths in workspace
   const candidatePaths = [
     path.join(wsRoot, cleanSubPath),
@@ -242,18 +308,34 @@ app.get(['/api/projects/:id/preview', '/api/projects/:id/preview/*'], async (req
 
   for (const full of candidatePaths) {
     if (fs.existsSync(full) && fs.statSync(full).isFile()) {
+      if (full.endsWith('.html')) {
+        return await sendHtmlWithBase(full);
+      }
+      return res.sendFile(full);
+    }
+  }
+
+  // Search recursively for the requested filename if it wasn't at the root
+  const fileName = path.basename(cleanSubPath);
+  const allWsFiles = await listWorkspaceFiles(projectId);
+  const matchedFile = allWsFiles.find(f => path.basename(f.path) === fileName || f.path === cleanSubPath);
+  if (matchedFile) {
+    const full = path.join(wsRoot, matchedFile.path);
+    if (fs.existsSync(full)) {
+      if (full.endsWith('.html')) {
+        return await sendHtmlWithBase(full);
+      }
       return res.sendFile(full);
     }
   }
 
   // If requesting root/index.html and specific file not found, try any .html file in workspace
   if (cleanSubPath === 'index.html' || cleanSubPath === '') {
-    const wsFiles = await listWorkspaceFiles(projectId);
-    const htmlFile = wsFiles.find(f => f.path.endsWith('.html') || f.path === 'index.html');
+    const htmlFile = allWsFiles.find(f => f.path.endsWith('.html') || f.path === 'index.html');
     if (htmlFile) {
       const full = path.join(wsRoot, htmlFile.path);
       if (fs.existsSync(full)) {
-        return res.sendFile(full);
+        return await sendHtmlWithBase(full);
       }
     }
 
@@ -286,7 +368,7 @@ app.get(['/api/projects/:id/preview', '/api/projects/:id/preview/*'], async (req
             <p>The autonomous agent is currently writing source code files to the workspace. Once the HTML entry point is compiled, the live interactive preview will mount here.</p>
             <div class="meta">
               <div class="meta-row"><span class="meta-label">OBJECTIVE:</span><span class="meta-val">${(project?.originalUserPrompt || '').slice(0, 40)}...</span></div>
-              <div class="meta-row"><span class="meta-label">FILES WRITTEN:</span><span class="meta-val">${wsFiles.length} files</span></div>
+              <div class="meta-row"><span class="meta-label">FILES WRITTEN:</span><span class="meta-val">${allWsFiles.length} files</span></div>
               <div class="meta-row"><span class="meta-label">STATUS:</span><span class="meta-val">${project?.status || 'EXECUTING'}</span></div>
             </div>
             <div class="spinner"></div>

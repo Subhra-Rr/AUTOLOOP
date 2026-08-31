@@ -78,5 +78,23 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
       'Zero-tolerance financial reconciliation test suite'
     ],
     techStack: ['React 19', 'TypeScript', 'Node.js', 'Express', 'SQL Ledger', 'TailwindCSS']
+  },
+  {
+    id: 'precision-scientific-calculator',
+    title: 'Precision Arithmetic & Financial Calculator',
+    icon: 'Calculator',
+    category: 'Interactive Web Application',
+    shortDesc: 'Full decimal-precision arithmetic engine, keyboard shortcuts, equation history, and scientific operators.',
+    prompt: 'Build a production-ready precision scientific calculator web application with full arithmetic operations (+, -, *, /, %, ±, .), complete keyboard input handling, computation history tape with recall, zero-division error guards, clear/all-clear functions, and automated unit test suite with 100% functional test coverage.',
+    estimatedTasks: 6,
+    requirements: [
+      'Full arithmetic engine supporting addition, subtraction, multiplication, and division',
+      'Decimal precision management and negative/positive sign inversion',
+      'Full physical keyboard event listener mapping for rapid calculations',
+      'Interactive calculation history tape with click-to-recall values',
+      'Zero-division and invalid equation error guards',
+      'Complete Node.js unit test suite verifying all mathematical operations'
+    ],
+    techStack: ['HTML5', 'CSS3', 'JavaScript ES6+', 'Node.js Test Runner']
   }
 ];

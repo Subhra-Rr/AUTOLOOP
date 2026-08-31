@@ -463,6 +463,299 @@ describe('Authentication & RBAC Middleware Test Suite', () => {
   });
 });
 `
+    },
+    {
+      path: 'index.html',
+      name: 'index.html',
+      language: 'html',
+      content: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CivicSense: College Complaint Portal</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #0a0b10; color: #f3f4f6; min-height: 100vh; padding: 20px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .logo-badge { background: #06b6d4; color: #000; font-weight: 800; font-size: 14px; padding: 6px 12px; border-radius: 8px; font-family: monospace; }
+    h1 { font-size: 20px; font-weight: 700; color: #fff; }
+    .nav-tabs { display: flex; gap: 8px; background: #12131c; padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06); }
+    .tab-btn { background: transparent; border: none; color: #9ca3af; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .tab-btn.active { background: #06b6d4; color: #000; }
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .metric-card { background: #141622; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; }
+    .metric-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; font-family: monospace; }
+    .metric-val { font-size: 28px; font-weight: 700; color: #fff; margin-top: 4px; font-family: monospace; }
+    .panel { background: #141622; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 24px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; color: #d1d5db; margin-bottom: 6px; font-weight: 600; font-family: monospace; }
+    input, select, textarea { width: 100%; background: #0a0b10; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 14px; color: #fff; font-size: 13px; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: #06b6d4; }
+    .btn-submit { background: #06b6d4; color: #000; font-weight: 700; font-size: 14px; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; width: 100%; transition: opacity 0.15s; }
+    .btn-submit:hover { opacity: 0.9; }
+    .search-bar { display: flex; gap: 10px; margin-bottom: 16px; }
+    .complaint-card { background: #0d0e17; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px; margin-bottom: 12px; transition: border-color 0.15s; }
+    .complaint-card:hover { border-color: rgba(6,182,212,0.4); }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+    .badge { font-size: 10px; font-family: monospace; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+    .badge-submitted { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+    .badge-review { background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+    .badge-resolved { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-critical { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .actions { display: flex; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.08); }
+    .action-btn { background: #1f2233; border: 1px solid rgba(255,255,255,0.1); color: #d1d5db; font-size: 11px; padding: 5px 10px; border-radius: 6px; cursor: pointer; }
+    .action-btn:hover { background: #2b2f47; color: #fff; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #06b6d4; color: #000; font-weight: 700; font-size: 13px; padding: 12px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <span class="logo-badge">CIVICSENSE</span>
+        <h1>College Grievance Redressal System</h1>
+      </div>
+      <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('submit')">File Grievance</button>
+        <button class="tab-btn" onclick="switchTab('track')">Track & Triage</button>
+        <button class="tab-btn" onclick="switchTab('metrics')">SLA Metrics</button>
+      </div>
+    </header>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Total Tickets</div>
+        <div id="statTotal" class="metric-val">12</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Active / In Progress</div>
+        <div id="statActive" class="metric-val" style="color:#fbbf24;">4</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Resolved</div>
+        <div id="statResolved" class="metric-val" style="color:#34d399;">8</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">SLA Compliance Rate</div>
+        <div id="statSla" class="metric-val" style="color:#22d3ee;">98.4%</div>
+      </div>
+    </div>
+
+    <!-- TAB 1: Submit Form -->
+    <div id="tabSubmit" class="panel">
+      <h2 style="font-size:16px; margin-bottom:16px; color:#fff;">File a New Official Campus Grievance</h2>
+      <form id="grievanceForm" onsubmit="handleFormSubmit(event)">
+        <div class="form-group">
+          <label>GRIEVANCE TITLE</label>
+          <input type="text" id="titleInput" placeholder="e.g. Wi-Fi outage in Block B 3rd Floor" required minlength="5" />
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label>CATEGORY</label>
+            <select id="categorySelect">
+              <option value="FACILITY">Campus Facility / Maintenance</option>
+              <option value="ACADEMIC">Academic & Coursework</option>
+              <option value="HOSTEL">Hostel & Accommodation</option>
+              <option value="FINANCE">Tuition & Scholarship</option>
+              <option value="DISCIPLINE">Code of Conduct</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>URGENCY LEVEL</label>
+            <select id="urgencySelect">
+              <option value="LOW">Low (72h SLA)</option>
+              <option value="MEDIUM" selected>Medium (48h SLA)</option>
+              <option value="HIGH">High (24h SLA)</option>
+              <option value="CRITICAL">Critical Emergency (12h SLA)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>DETAILED DESCRIPTION</label>
+          <textarea id="descInput" rows="4" placeholder="Provide full context, room numbers, dates, and impact..." required minlength="15"></textarea>
+        </div>
+        <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="anonCheck" style="width:auto;" />
+          <label for="anonCheck" style="margin:0; cursor:pointer;">File Anonymously (Hide Student ID from Faculty)</label>
+        </div>
+        <button type="submit" class="btn-submit">SUBMIT GRIEVANCE TICKET</button>
+      </form>
+    </div>
+
+    <!-- TAB 2: Track & Triage -->
+    <div id="tabTrack" class="panel" style="display:none;">
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search grievances by keyword, ID, category..." oninput="renderComplaints()" />
+        <select id="filterStatus" onchange="renderComplaints()" style="width:180px;">
+          <option value="ALL">All Statuses</option>
+          <option value="SUBMITTED">Submitted</option>
+          <option value="UNDER_REVIEW">Under Review</option>
+          <option value="RESOLVED">Resolved</option>
+        </select>
+      </div>
+      <div id="complaintsList"></div>
+    </div>
+
+    <!-- TAB 3: Metrics -->
+    <div id="tabMetrics" class="panel" style="display:none;">
+      <h2 style="font-size:16px; margin-bottom:16px; color:#fff;">Department Performance & SLA Adherence</h2>
+      <p style="font-size:13px; color:#9ca3af; margin-bottom:20px; line-height:1.6;">Real-time automated calculations of resolution turnarounds across Campus Facilities, Academics, and Administration.</p>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+        <div style="background:#0d0e17; padding:16px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:12px; color:#9ca3af; font-family:monospace; margin-bottom:8px;">FACILITIES (MAINTENANCE)</div>
+          <div style="font-size:20px; font-weight:700; color:#34d399;">96.8% Resolved in SLA</div>
+          <div style="font-size:11px; color:#6b7280; margin-top:4px;">Average time: 14.2 hours</div>
+        </div>
+        <div style="background:#0d0e17; padding:16px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:12px; color:#9ca3af; font-family:monospace; margin-bottom:8px;">ACADEMIC AFFAIRS</div>
+          <div style="font-size:20px; font-weight:700; color:#60a5fa;">100% Resolved in SLA</div>
+          <div style="font-size:11px; color:#6b7280; margin-top:4px;">Average time: 8.5 hours</div>
+        </div>
+        <div style="background:#0d0e17; padding:16px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:12px; color:#9ca3af; font-family:monospace; margin-bottom:8px;">HOSTEL RESIDENCE</div>
+          <div style="font-size:20px; font-weight:700; color:#fbbf24;">92.5% Resolved in SLA</div>
+          <div style="font-size:11px; color:#6b7280; margin-top:4px;">Average time: 22.1 hours</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Grievance ticket successfully submitted!</div>
+
+  <script>
+    let complaints = JSON.parse(localStorage.getItem('civic_complaints')) || [
+      { id: 'CMP-849201', title: 'Main Library 2nd Floor AC malfunctioning', category: 'FACILITY', urgency: 'HIGH', status: 'UNDER_REVIEW', desc: 'Temperature exceeding 32C during peak afternoon study hours.', date: 'Today at 09:30 AM', isAnon: false },
+      { id: 'CMP-739102', title: 'Grading discrepancy on CS302 Midterm Exam', category: 'ACADEMIC', urgency: 'MEDIUM', status: 'SUBMITTED', desc: 'Question 4 rubric was applied incorrectly for Section B students.', date: 'Yesterday at 04:15 PM', isAnon: false },
+      { id: 'CMP-619283', title: 'Hot water geyser failure in Hostel Block C', category: 'HOSTEL', urgency: 'CRITICAL', status: 'RESOLVED', desc: 'Geyser in 3rd-floor bathroom stopped heating entirely.', date: '2 days ago', isAnon: true }
+    ];
+
+    function saveState() {
+      localStorage.setItem('civic_complaints', JSON.stringify(complaints));
+      updateStats();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tabSubmit').style.display = tab === 'submit' ? 'block' : 'none';
+      document.getElementById('tabTrack').style.display = tab === 'track' ? 'block' : 'none';
+      document.getElementById('tabMetrics').style.display = tab === 'metrics' ? 'block' : 'none';
+      
+      const buttons = document.querySelectorAll('.tab-btn');
+      if (tab === 'submit') buttons[0].classList.add('active');
+      if (tab === 'track') { buttons[1].classList.add('active'); renderComplaints(); }
+      if (tab === 'metrics') buttons[2].classList.add('active');
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const title = document.getElementById('titleInput').value.trim();
+      const category = document.getElementById('categorySelect').value;
+      const urgency = document.getElementById('urgencySelect').value;
+      const desc = document.getElementById('descInput').value.trim();
+      const isAnon = document.getElementById('anonCheck').checked;
+
+      const newTicket = {
+        id: 'CMP-' + Math.floor(100000 + Math.random() * 900000),
+        title,
+        category,
+        urgency,
+        desc,
+        isAnon,
+        status: 'SUBMITTED',
+        date: 'Just now'
+      };
+
+      complaints.unshift(newTicket);
+      saveState();
+      document.getElementById('grievanceForm').reset();
+      showToast('Grievance ' + newTicket.id + ' registered successfully!');
+      switchTab('track');
+    }
+
+    function updateStatus(id, newStatus) {
+      const item = complaints.find(c => c.id === id);
+      if (item) {
+        item.status = newStatus;
+        saveState();
+        renderComplaints();
+        showToast('Ticket ' + id + ' transitioned to ' + newStatus);
+      }
+    }
+
+    function deleteTicket(id) {
+      complaints = complaints.filter(c => c.id !== id);
+      saveState();
+      renderComplaints();
+      showToast('Ticket ' + id + ' removed');
+    }
+
+    function updateStats() {
+      const total = complaints.length;
+      const active = complaints.filter(c => c.status !== 'RESOLVED').length;
+      const resolved = complaints.filter(c => c.status === 'RESOLVED').length;
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statActive').textContent = active;
+      document.getElementById('statResolved').textContent = resolved;
+    }
+
+    function renderComplaints() {
+      const search = (document.getElementById('searchInput').value || '').toLowerCase();
+      const filter = document.getElementById('filterStatus').value;
+      const container = document.getElementById('complaintsList');
+
+      const filtered = complaints.filter(c => {
+        const matchesSearch = c.title.toLowerCase().includes(search) || c.id.toLowerCase().includes(search) || c.category.toLowerCase().includes(search);
+        const matchesStatus = filter === 'ALL' || c.status === filter;
+        return matchesSearch && matchesStatus;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:32px; color:#6b7280; font-size:13px;">No grievance records match your filter criteria.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(c => {
+        const statusBadgeClass = c.status === 'SUBMITTED' ? 'badge-submitted' : c.status === 'UNDER_REVIEW' ? 'badge-review' : 'badge-resolved';
+        const urgencyBadgeClass = c.urgency === 'CRITICAL' ? 'badge-critical' : '';
+        return \`
+          <div class="complaint-card">
+            <div class="card-header">
+              <div>
+                <span style="font-family:monospace; font-size:11px; color:#06b6d4; font-weight:bold; margin-right:8px;">\${c.id}</span>
+                <span class="badge \${statusBadgeClass}">\${c.status.replace('_', ' ')}</span>
+                \${c.urgency === 'CRITICAL' ? '<span class="badge badge-critical" style="margin-left:6px;">CRITICAL SLA</span>' : ''}
+                \${c.isAnon ? '<span class="badge" style="background:#27272a; color:#a1a1aa; margin-left:6px;">ANONYMOUS</span>' : ''}
+                <h3 style="font-size:15px; font-weight:600; color:#fff; margin-top:6px;">\${c.title}</h3>
+              </div>
+              <span style="font-size:11px; color:#6b7280; font-family:monospace;">\${c.date}</span>
+            </div>
+            <p style="font-size:13px; color:#9ca3af; line-height:1.5; margin:8px 0;">\${c.desc}</p>
+            <div class="actions">
+              \${c.status === 'SUBMITTED' ? '<button class="action-btn" onclick="updateStatus(\\'' + c.id + '\\', \\'UNDER_REVIEW\\')">Mark Under Review</button>' : ''}
+              \${c.status === 'UNDER_REVIEW' ? '<button class="action-btn" onclick="updateStatus(\\'' + c.id + '\\', \\'RESOLVED\\')">Mark Resolved</button>' : ''}
+              \${c.status === 'RESOLVED' ? '<button class="action-btn" onclick="updateStatus(\\'' + c.id + '\\', \\'SUBMITTED\\')">Reopen Ticket</button>' : ''}
+              <button class="action-btn" style="margin-left:auto; color:#ef4444;" onclick="deleteTicket('\\'' + c.id + '\\'')">Delete</button>
+            </div>
+          </div>
+        \`;
+      }).join('');
+    }
+
+    updateStats();
+    renderComplaints();
+  </script>
+</body>
+</html>`
     }
   ];
 

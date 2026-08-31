@@ -210,31 +210,47 @@ export function LiveTerminal({ logs, onClearLogs }: LiveTerminalProps) {
       {/* Terminal Log Output Stream */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-3 space-y-1.5 text-[11px] leading-relaxed select-text bg-[#050505]/90"
+        className="flex-1 overflow-y-auto p-3 space-y-2 text-[11px] leading-relaxed select-text bg-[#050505]/95"
       >
         {filteredLogs.length === 0 ? (
           <div className="text-white/30 italic py-8 text-center text-xs">
             NO STREAMING EVENTS CAPTURED
           </div>
         ) : (
-          filteredLogs.map((log) => (
-            <div key={log.id} className="flex items-start space-x-2 group hover:bg-white/5 p-1 rounded transition-colors">
-              {/* Timestamp */}
-              <span className="text-white/40 text-[10px] select-none shrink-0 font-mono">
-                [{log.timestamp}]
-              </span>
+          filteredLogs.map((log) => {
+            const isCodeWrite = log.message.includes('[Tool: writeFile]') || log.message.includes('Wrote') || log.message.includes('|');
+            return (
+              <div key={log.id} className="flex items-start space-x-2 group hover:bg-white/5 p-1.5 rounded transition-colors">
+                {/* Timestamp */}
+                <span className="text-white/40 text-[10px] select-none shrink-0 font-mono pt-0.5">
+                  [{log.timestamp}]
+                </span>
 
-              {/* Agent Badge */}
-              <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold border shrink-0 ${getAgentColor(log.agent)}`}>
-                {log.agent}
-              </span>
+                {/* Agent Badge */}
+                <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold border shrink-0 ${getAgentColor(log.agent)}`}>
+                  {log.agent}
+                </span>
 
-              {/* Message */}
-              <span className={`flex-1 break-words font-mono ${getLevelColor(log.level)}`}>
-                {log.message}
-              </span>
-            </div>
-          ))
+                {/* Message */}
+                <div className="flex-1 min-w-0 font-mono">
+                  {isCodeWrite && log.message.includes('\n') ? (
+                    <div className="space-y-1">
+                      <div className={`font-semibold ${getLevelColor(log.level)}`}>
+                        {log.message.split('\n')[0]}
+                      </div>
+                      <pre className="p-2 rounded bg-black/60 border border-cyan-500/20 text-cyan-200/90 overflow-x-auto text-[10px] font-mono whitespace-pre leading-relaxed shadow-inner">
+                        {log.message.split('\n').slice(1).join('\n')}
+                      </pre>
+                    </div>
+                  ) : (
+                    <span className={`break-words whitespace-pre-wrap ${getLevelColor(log.level)}`}>
+                      {log.message}
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
 

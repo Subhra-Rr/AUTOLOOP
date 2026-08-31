@@ -182,7 +182,11 @@ export function TaskHierarchy({ project, selectedTaskId, onSelectTask }: TaskHie
                     </span>
                   )}
                   {task.toolCalls.length > 0 && (
-                    <span>{task.toolCalls.length} calls</span>
+                    <span className="text-cyan-400/80 font-mono font-semibold">
+                      {task.toolCalls.find(tc => tc.tool === 'writeFile')?.arguments?.path 
+                        ? `${task.toolCalls.find(tc => tc.tool === 'writeFile')?.arguments?.path} (${task.toolCalls.find(tc => tc.tool === 'writeFile')?.arguments?.lines || 0}L)`
+                        : `${task.toolCalls.length} tool calls`}
+                    </span>
                   )}
                 </div>
 
@@ -191,9 +195,9 @@ export function TaskHierarchy({ project, selectedTaskId, onSelectTask }: TaskHie
                     {task.progress}%
                   </span>
                 )}
-                {task.status === 'PASSED' && task.completedAt && (
+                {task.status === 'PASSED' && (
                   <span className="text-green-400 font-medium">
-                    {task.completedAt}
+                    {task.completedAt || 'COMPLETED'}
                   </span>
                 )}
               </div>

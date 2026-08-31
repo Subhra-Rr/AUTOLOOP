@@ -247,10 +247,11 @@ export async function executeAutonomousStep(project: ProjectState): Promise<{
 Analyze the user's exact objective: "${project.originalUserPrompt}".
 Generate a structured, dependency-ordered technical task graph tailored specifically to this objective.
 
-CRITICAL ARCHITECTURAL REQUIREMENTS:
-1. Every web application, website, tool, dashboard, calculator, game, or frontend MUST produce a runnable, interactive "index.html" (with modern responsive design, clean UI layout, and functional JavaScript) at the root of the workspace so it can be previewed live in the browser.
-2. Every project must include automated test files in "tests/" (e.g. "tests/app.test.js") using Node's built-in test runner ('node:test' and 'node:assert').
-3. Keep the plan focused and actionable (between 5 and 7 concise tasks).
+CRITICAL FUNCTIONALITY MANDATES:
+1. NO MOCK STUBS OR FAKE PLACEHOLDERS: Every web application, website, calculator, dashboard, or tool MUST be 100% fully functional and interactive.
+2. ENTRY POINT: Must produce a runnable, interactive "index.html" with modern responsive design, clean UI styling, and FULL WORKING JAVASCRIPT EVENT LISTENERS for every single button, form, input, and control (e.g. if building a calculator, all arithmetic operations, keyboard events, and history logs must compute real math with zero broken buttons).
+3. AUTOMATED TESTS: Must include unit test files in "tests/" (e.g. "tests/app.test.js") using Node's built-in test runner ('node:test' and 'node:assert').
+4. Keep the plan focused, pragmatic, and actionable (between 4 and 6 concise tasks).
 
 Return a strictly valid JSON object with the following schema:
 {
@@ -530,21 +531,31 @@ Return a strictly valid JSON object with the following schema:
     const existingFiles = await listWorkspaceFiles(project.projectId);
     project.files = existingFiles;
 
-    const taskSystemPrompt = `You are an Autonomous AI Developer operating in a sandboxed Node.js environment.
+    const taskSystemPrompt = `You are an Autonomous AI Senior Engineer operating in an isolated Node.js disk workspace.
 Task to execute: "${currentTask.title}" - ${currentTask.description}
 Project Objective: "${project.originalUserPrompt}"
 Current files in workspace: ${existingFiles.map(f => f.path).join(', ') || 'none'}
 
-Decide what files to write or command to execute to fulfill this task.
+CRITICAL CODE QUALITY & FUNCTIONALITY RULES:
+1. MANDATORY FULL FUNCTIONALITY: The code you write MUST BE 100% PRODUCTION-READY, FULLY FUNCTIONAL, AND COMPLETE. NEVER write empty placeholder functions, dummy returns, or TODO comments.
+2. IF WRITING/UPDATING HTML OR UI (e.g. index.html):
+   - It MUST contain the full modern CSS styling and COMPLETE inline or linked JavaScript (<script>) with active event listeners for EVERY single button, form, input, slider, canvas, and toggle.
+   - If building a calculator: Every number (0-9), decimal (.), operator (+, -, *, /, %, =), clear (C, AC), backspace (⌫), and sign flip (±) MUST calculate real arithmetic accurately with keyboard support and history log.
+   - If building a portal or tool: All forms, status updates, filter tabs, and searches must be fully interactive.
+3. IF WRITING NODE.JS MODULES (e.g. src/*.js):
+   - Export standard ES module functions that can be imported both in tests and frontend.
+4. IF WRITING TESTS (e.g. tests/*.test.js):
+   - Use Node's built-in test runner ('node:test' and 'node:assert').
+
+Decide what file to write or command to execute to fulfill this task.
 Return a strictly valid JSON response with this schema:
 {
   "action": "WRITE_FILE" | "RUN_COMMAND" | "RUN_TESTS",
-  "filePath": string (if WRITE_FILE, relative path e.g. "src/auth.js" or "tests/auth.test.js"),
-  "content": string (if WRITE_FILE, the complete high quality production JavaScript/Node code),
+  "filePath": string (if WRITE_FILE, relative path e.g. "index.html", "src/calculator.js" or "tests/calculator.test.js"),
+  "content": string (if WRITE_FILE, the complete high quality production code),
   "command": string (if RUN_COMMAND, the shell command),
   "summary": string (1-sentence summary of what this tool call accomplishes)
-}
-If generating tests, use Node's built-in test runner ('node:test' and 'node:assert').`;
+}`;
 
     console.log(`[AUTOLOOP_LIFECYCLE] LLM_REQUESTED: ${currentTask.code}`);
     const taskResponseText = await callGemini(
@@ -567,6 +578,11 @@ If generating tests, use Node's built-in test runner ('node:test' and 'node:asse
       project.files = await listWorkspaceFiles(project.projectId);
       project.activeFilePath = actionData.filePath;
 
+      // Extract a 6-line code preview with line numbers for live transparency
+      const rawLines = actionData.content.split('\n');
+      const previewLines = rawLines.slice(0, 6).map((l: string, i: number) => `    ${String(i + 1).padStart(2, ' ')} | ${l}`).join('\n');
+      const moreCount = rawLines.length > 6 ? rawLines.length - 6 : 0;
+
       // Record tool call
       const toolCall = {
         id: 'tool-' + Math.random().toString(36).substring(2, 9),
@@ -585,7 +601,7 @@ If generating tests, use Node's built-in test runner ('node:test' and 'node:asse
         timestamp: now,
         agent: currentTask.agent,
         level: 'SUCCESS',
-        message: `[Tool: writeFile] Written ${actionData.filePath} (${writeResult.lineCount} lines)`
+        message: `[Tool: writeFile] Wrote ${writeResult.lineCount} lines to "${actionData.filePath}":\n${previewLines}${moreCount > 0 ? `\n    ... (+${moreCount} additional lines generated)` : ''}`
       });
 
       project.auditLogs.push({
@@ -596,7 +612,7 @@ If generating tests, use Node's built-in test runner ('node:test' and 'node:asse
         tool: 'writeFile',
         risk: 'SAFE',
         status: 'SUCCESS',
-        details: `File "${actionData.filePath}" saved to workspace.`
+        details: `File "${actionData.filePath}" saved (${writeResult.lineCount} lines, ${writeResult.bytes} bytes).`
       });
 
     } else if (actionData.action === 'RUN_COMMAND' && actionData.command) {
