@@ -9,7 +9,7 @@ import {
   LineChart, 
   Wrench, 
   ShieldCheck, 
-  CheckCircle2,
+  CheckCircle2, 
   AlertTriangle,
   RotateCw
 } from 'lucide-react';
@@ -50,31 +50,31 @@ export function PipelineGraph({ project, onSelectNode }: PipelineGraphProps) {
   };
 
   return (
-    <div className="p-4 sm:p-5 rounded-lg bg-[#0a0a0a]/60 border border-white/10 backdrop-blur-md shadow-2xl space-y-4">
+    <div className="p-3.5 sm:p-5 rounded-lg bg-[#0a0a0a]/60 border border-white/10 backdrop-blur-md shadow-2xl space-y-3 sm:space-y-4">
       {/* Header bar */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2">
         <div className="flex items-center space-x-2">
           <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)] animate-pulse" />
-          <h3 className="text-[10px] font-mono font-bold uppercase tracking-widest text-white/70">
-            AUTONOMOUS EXECUTION GRAPH PIPELINE
+          <h3 className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-white/70">
+            AUTONOMOUS EXECUTION GRAPH
           </h3>
         </div>
-        <div className="flex items-center space-x-3 text-[10px] font-mono">
+        <div className="flex items-center space-x-2 sm:space-x-3 text-[10px] font-mono">
           <span className="text-white/40">
             STAGE: <strong className="text-cyan-400 font-semibold">{project.activeNode}</strong>
           </span>
           {isRepairActive && (
-            <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] font-bold shadow-[0_0_8px_rgba(239,68,68,0.4)] animate-pulse">
+            <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30 text-[9px] sm:text-[10px] font-bold shadow-[0_0_8px_rgba(239,68,68,0.4)] animate-pulse">
               <RotateCw className="w-2.5 h-2.5 animate-spin" />
-              <span>AUTO_REPAIR_LOOP</span>
+              <span>REPAIR_LOOP</span>
             </span>
           )}
         </div>
       </div>
 
-      {/* Interactive Flow Visualizer */}
-      <div className="relative py-4 overflow-x-auto">
-        <div className="flex items-center justify-between min-w-[760px] gap-2 relative">
+      {/* Interactive Flow Visualizer with smooth horizontal scroll */}
+      <div className="relative py-2 sm:py-4 overflow-x-auto no-scrollbar scroll-smooth">
+        <div className="flex items-center justify-between min-w-[700px] sm:min-w-[780px] gap-2 relative px-2">
           {/* Main Connecting Track Line */}
           <div className="absolute top-1/2 left-6 right-6 h-0.5 bg-white/10 -translate-y-1/2 z-0" />
 
@@ -88,8 +88,8 @@ export function PipelineGraph({ project, onSelectNode }: PipelineGraphProps) {
 
           {/* Repair Loop Arc Highlight (if repair active or completed) */}
           {project.repairHistory.length > 0 && (
-            <div className="absolute top-0 right-[25%] left-[50%] h-8 border-t-2 border-dashed border-red-500/60 rounded-t-full pointer-events-none -translate-y-3 z-0 flex items-center justify-center">
-              <span className="bg-[#0a0a0a] px-2 text-[9px] font-mono text-red-400 border border-red-500/30 rounded">
+            <div className="absolute top-0 right-[25%] left-[50%] h-7 sm:h-8 border-t-2 border-dashed border-red-500/60 rounded-t-full pointer-events-none -translate-y-2 sm:-translate-y-3 z-0 flex items-center justify-center">
+              <span className="bg-[#0a0a0a] px-2 text-[8px] sm:text-[9px] font-mono text-red-400 border border-red-500/30 rounded">
                 TEST → REPAIR → RETEST
               </span>
             </div>
@@ -114,22 +114,22 @@ export function PipelineGraph({ project, onSelectNode }: PipelineGraphProps) {
               <div
                 key={node.id}
                 onClick={() => onSelectNode?.(node.id)}
-                className="relative z-10 flex flex-col items-center cursor-pointer group transition-all duration-300"
+                className="relative z-10 flex flex-col items-center cursor-pointer group transition-all duration-300 shrink-0"
               >
                 {/* Node circular/square box */}
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 ${nodeStyle}`}>
-                  <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all duration-300 ${nodeStyle}`}>
+                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:scale-110" />
                 </div>
 
                 {/* Node Label */}
-                <span className={`text-[10px] font-mono font-bold mt-2 tracking-wider ${
+                <span className={`text-[9px] sm:text-[10px] font-mono font-bold mt-1.5 sm:mt-2 tracking-wider ${
                   status === 'ACTIVE' ? 'text-cyan-400' : status === 'COMPLETED' ? 'text-green-400' : 'text-white/40'
                 }`}>
                   {node.label}
                 </span>
 
                 {/* Subtitle / Agent role */}
-                <span className="text-[8px] font-mono text-white/30 text-center truncate max-w-[65px] uppercase">
+                <span className="text-[7px] sm:text-[8px] font-mono text-white/30 text-center truncate max-w-[60px] sm:max-w-[65px] uppercase">
                   {node.agent.split('_')[0]}
                 </span>
               </div>
@@ -139,25 +139,25 @@ export function PipelineGraph({ project, onSelectNode }: PipelineGraphProps) {
       </div>
 
       {/* Node activity bar summary */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/10 text-[10px] font-mono">
-        <div className="flex items-center space-x-2 text-white/40">
-          <span>CURRENT TASK:</span>
-          <span className="text-white font-semibold">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2.5 sm:pt-3 border-t border-white/10 text-[9px] sm:text-[10px] font-mono">
+        <div className="flex items-center space-x-1.5 text-white/40 truncate">
+          <span className="shrink-0">TASK:</span>
+          <span className="text-white font-semibold truncate">
             {project.currentTaskId 
               ? `${project.tasks.find(t => t.id === project.currentTaskId)?.code}: ${project.tasks.find(t => t.id === project.currentTaskId)?.title}`
               : project.status === 'COMPLETED' ? 'ALL TASKS VERIFIED' : 'ENGINE READY'}
           </span>
         </div>
-        <div className="flex items-center space-x-4 text-white/40">
-          <span className="flex items-center space-x-1.5">
+        <div className="flex items-center space-x-3 sm:space-x-4 text-white/40 shrink-0">
+          <span className="flex items-center space-x-1">
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
             <span>COMPLETED ({project.metrics.completedTasks}/10)</span>
           </span>
-          <span className="flex items-center space-x-1.5">
+          <span className="flex items-center space-x-1">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)] animate-pulse" />
-            <span>ACTIVE STAGE</span>
+            <span>ACTIVE</span>
           </span>
-          <span className="flex items-center space-x-1.5">
+          <span className="flex items-center space-x-1">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
             <span>REPAIRS ({project.metrics.repairCyclesCount})</span>
           </span>

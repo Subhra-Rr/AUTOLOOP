@@ -206,7 +206,7 @@ export function App() {
       {!project ? (
         <LandingPage onStartBuild={handleStartBuild} />
       ) : (
-        <main className="flex-1 p-4 lg:p-6 max-w-[1700px] w-full mx-auto space-y-6 relative z-10">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 max-w-[1700px] w-full mx-auto space-y-4 sm:space-y-6 relative z-10">
           {/* Always Visible Pipeline Node Graph on Workspace Tab */}
           <PipelineGraph project={project} onSelectNode={handleSelectNode} />
 
@@ -216,9 +216,9 @@ export function App() {
           )}
 
           {activeTab === 'workspace' && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[620px]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
               {/* Left Task Hierarchy (5 cols) */}
-              <div className="lg:col-span-5 h-[620px]">
+              <div className="lg:col-span-5 h-[420px] sm:h-[480px] lg:h-[640px]">
                 <TaskHierarchy
                   project={project}
                   selectedTaskId={selectedTaskId}
@@ -231,7 +231,7 @@ export function App() {
               </div>
 
               {/* Right Live Terminal Stream (7 cols) */}
-              <div className="lg:col-span-7 h-[620px]">
+              <div className="lg:col-span-7 h-[420px] sm:h-[480px] lg:h-[640px]">
                 <LiveTerminal
                   logs={project.terminalLogs}
                   onClearLogs={() => {
@@ -243,7 +243,7 @@ export function App() {
           )}
 
           {activeTab === 'code' && (
-            <div className="h-[700px]">
+            <div className="min-h-[500px] lg:h-[720px]">
               <CodeViewer
                 project={project}
                 activeFilePath={activeFilePath}
