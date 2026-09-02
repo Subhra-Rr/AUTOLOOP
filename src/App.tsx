@@ -176,9 +176,13 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#e0e0e0] flex flex-col selection:bg-cyan-500 selection:text-black relative">
-      {/* Immersive background glow layer */}
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(6,182,212,0.06),transparent_50%)] pointer-events-none z-0" />
+    <div className="min-h-screen bg-[#030712] text-[#f1f5f9] flex flex-col selection:bg-cyan-500 selection:text-black relative overflow-x-hidden">
+      {/* Immersive background glowing mesh and animated glass orbs */}
+      <div className="fixed inset-0 bg-grid-pattern opacity-25 pointer-events-none z-0" />
+      <div className="fixed top-[-10%] left-[-5%] w-[600px] h-[600px] bg-cyan-600/15 rounded-full blur-[140px] pointer-events-none animate-float-slow z-0" />
+      <div className="fixed top-[30%] right-[-10%] w-[650px] h-[650px] bg-indigo-600/15 rounded-full blur-[150px] pointer-events-none animate-float-reverse z-0" />
+      <div className="fixed bottom-[-10%] left-[25%] w-[700px] h-[700px] bg-emerald-600/10 rounded-full blur-[160px] pointer-events-none animate-float-slow z-0" />
+      <div className="fixed top-[60%] left-[10%] w-[450px] h-[450px] bg-purple-600/10 rounded-full blur-[130px] pointer-events-none animate-pulse-glow z-0" />
 
       <Navbar
         project={project}
@@ -194,15 +198,15 @@ export function App() {
 
       {/* Global Real Error Alert Banner */}
       {globalError && (
-        <div className="bg-red-500/15 border-b border-red-500/30 px-4 py-2.5 flex items-center justify-between text-xs font-mono text-red-300 z-50">
+        <div className="glass-panel bg-red-950/40 border-b border-red-500/30 px-4 py-2.5 flex items-center justify-between text-xs font-mono text-red-200 z-50 backdrop-blur-xl">
           <div className="flex items-center space-x-2">
             <span className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
-            <span className="font-bold uppercase">[SYSTEM_ERROR]:</span>
+            <span className="font-bold uppercase text-red-400">[SYSTEM_ERROR]:</span>
             <span>{globalError}</span>
           </div>
           <button 
             onClick={() => setGlobalError(null)}
-            className="px-2 py-0.5 rounded bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-500/40 text-[10px]"
+            className="px-2.5 py-1 rounded bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-500/40 text-[10px] glass-button transition-colors"
           >
             DISMISS
           </button>
@@ -276,19 +280,19 @@ export function App() {
         </main>
       )}
 
-      {/* Immersive UI Persistent Footer */}
-      <footer className="py-2 bg-[#0a0a0a] border-t border-white/10 flex flex-col sm:flex-row items-center px-4 justify-between gap-2 text-[10px] font-mono text-white/50 shrink-0 z-40">
+      {/* Immersive UI Persistent Frosted Glass Footer */}
+      <footer className="py-2.5 glass-panel border-t border-white/10 flex flex-col sm:flex-row items-center px-4 sm:px-6 justify-between gap-2 text-[10px] font-mono text-white/60 shrink-0 z-40 backdrop-blur-2xl">
         <div className="flex items-center space-x-3">
-          <span className="text-cyan-400 font-semibold uppercase tracking-wider">AUTOLOOP v2.4.0</span>
+          <span className="text-cyan-400 font-bold uppercase tracking-wider text-[11px] drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]">AUTOLOOP v2.4.0</span>
           <span className="hidden md:inline text-white/20">|</span>
-          <span className="hidden sm:inline text-white/40">ZERO-TRUST SECURE SANDBOX</span>
+          <span className="hidden sm:inline text-white/50 tracking-wider">ZERO-TRUST SECURE SANDBOX</span>
         </div>
-        <div className="text-center text-white/70 font-sans text-xs">
+        <div className="text-center text-white/80 font-sans text-xs">
           Copyright © 2026 by Subhradeet Sabat | All Rights Reserved.
         </div>
-        <div className="flex items-center space-x-1.5 text-green-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.8)] animate-pulse" />
-          <span className="font-bold">SYSTEM_NOMINAL</span>
+        <div className="flex items-center space-x-2 text-green-400">
+          <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.9)] animate-pulse" />
+          <span className="font-bold tracking-wider">SYSTEM_NOMINAL</span>
         </div>
       </footer>
 

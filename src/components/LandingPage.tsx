@@ -76,38 +76,38 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
   return (
     <div className="min-h-[calc(100vh-4rem)] flex flex-col justify-between relative overflow-hidden">
       {/* Background subtle radial glows & engineering grid */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[700px] h-[400px] bg-gradient-to-tr from-cyan-600/10 via-indigo-600/10 to-emerald-600/10 blur-[130px] rounded-full pointer-events-none" />
+      <div className="absolute inset-0 bg-grid-pattern opacity-25 pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[750px] h-[450px] bg-gradient-to-tr from-cyan-600/15 via-indigo-600/15 to-emerald-600/15 blur-[140px] rounded-full pointer-events-none" />
 
       <main className="relative max-w-6xl mx-auto px-3 sm:px-6 pt-6 sm:pt-10 pb-12 sm:pb-16 w-full space-y-6 sm:space-y-10">
         {/* Eyebrow & Main Hero */}
         <div className="text-center space-y-3 sm:space-y-4 max-w-3xl mx-auto">
-          <div className="inline-flex items-center space-x-2 px-2.5 sm:px-3 py-1 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[10px] sm:text-[11px] font-mono shadow-[0_0_10px_rgba(6,182,212,0.2)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping shrink-0" />
-            <span className="truncate">AUTONOMOUS AI SOFTWARE ENGINEERING ENGINE</span>
+          <div className="inline-flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-full glass-card border border-cyan-500/30 text-cyan-300 text-[10px] sm:text-[11px] font-mono shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)] shrink-0" />
+            <span className="truncate tracking-wider font-semibold">AUTONOMOUS AI SOFTWARE ENGINEERING ENGINE</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight font-sans">
             One Objective. <br className="hidden sm:inline" />
-            <span className="text-cyan-400">
+            <span className="bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(6,182,212,0.35)]">
               Autonomous Loop.
             </span> <br />
             Real Verified Output.
           </h1>
 
-          <p className="text-xs sm:text-sm md:text-base text-white/60 max-w-2xl mx-auto leading-relaxed px-2">
+          <p className="text-xs sm:text-sm md:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed px-2">
             Specify any software application. AUTOLOOP writes real files to an isolated sandbox on disk, runs automated Node test suites, self-repairs failures, and produces a live preview.
           </p>
         </div>
 
         {/* Live Autonomous Pipeline Flow (Idle Roadmap) */}
-        <div className="p-3.5 sm:p-5 rounded-lg bg-[#0a0a0a]/60 border border-white/10 backdrop-blur-md shadow-2xl relative space-y-3">
+        <div className="p-4 sm:p-6 rounded-2xl glass-panel border border-white/10 shadow-2xl relative space-y-3.5 backdrop-blur-2xl">
           <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-white/50 flex items-center space-x-2">
-              <Zap className="w-3 h-3 text-cyan-400 shrink-0" />
-              <span>AUTONOMOUS_EXECUTION_LIFECYCLE</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-white/70 flex items-center space-x-2">
+              <Zap className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+              <span className="font-bold">AUTONOMOUS_EXECUTION_LIFECYCLE</span>
             </span>
-            <span className="text-[9px] sm:text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+            <span className="text-[9px] sm:text-[10px] font-mono text-cyan-300 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.15)] font-semibold">
               STATUS: IDLE — AWAITING PROMPT
             </span>
           </div>
@@ -120,15 +120,15 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
               return (
                 <div
                   key={step.label}
-                  className="p-2.5 sm:p-3 rounded-lg bg-[#050505] border border-white/5 space-y-1 sm:space-y-1.5 transition-all text-center group hover:border-cyan-500/30"
+                  className="p-3 rounded-xl glass-card border border-white/10 space-y-1.5 transition-all text-center group hover:border-cyan-500/40"
                 >
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md flex items-center justify-center mx-auto bg-white/5 text-white/50 group-hover:text-cyan-400 group-hover:bg-cyan-500/10 transition-colors">
-                    <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center mx-auto bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 group-hover:bg-cyan-500/20 group-hover:scale-105 transition-all shadow-[0_0_10px_rgba(6,182,212,0.15)]">
+                    <Icon className="w-3.5 h-3.5" />
                   </div>
-                  <span className="text-[9px] sm:text-[10px] font-mono font-bold block text-white/70">
+                  <span className="text-[10px] font-mono font-bold block text-white/90 tracking-wider">
                     {step.label}
                   </span>
-                  <p className="text-[8px] sm:text-[9px] text-white/40 leading-tight">
+                  <p className="text-[9px] text-white/40 leading-tight">
                     {step.desc}
                   </p>
                 </div>
@@ -138,15 +138,15 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
         </div>
 
         {/* Real User Prompt Form */}
-        <div className="p-4 sm:p-8 rounded-lg bg-[#0a0a0a]/80 border border-white/10 backdrop-blur-xl shadow-2xl space-y-5 sm:space-y-6">
+        <div className="p-5 sm:p-8 rounded-2xl glass-panel border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.5)] space-y-5 sm:space-y-6 backdrop-blur-2xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
-            <div className="flex items-center space-x-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-              <h2 className="text-xs sm:text-sm font-mono uppercase tracking-widest text-white/90 font-bold">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.9)] animate-pulse" />
+              <h2 className="text-xs sm:text-sm font-mono uppercase tracking-widest text-white/95 font-extrabold">
                 DEFINE APPLICATION OBJECTIVE
               </h2>
             </div>
-            <span className="text-[9px] sm:text-[10px] font-mono text-white/40">
+            <span className="text-[10px] font-mono text-cyan-300/80 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
               ZERO-TRUST ISOLATION
             </span>
           </div>
@@ -154,12 +154,12 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-mono uppercase tracking-wider text-white/50 flex items-center space-x-1.5">
-                  <Sparkles className="w-3 h-3 text-cyan-400" />
+                <label className="text-[10px] font-mono uppercase tracking-wider text-white/70 flex items-center space-x-1.5 font-bold">
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
                   <span>PROJECT GOAL & REQUIREMENTS</span>
                 </label>
                 {validationError && (
-                  <span className="text-[10px] font-mono text-red-400">
+                  <span className="text-[10px] font-mono text-red-400 font-semibold">
                     {validationError}
                   </span>
                 )}
@@ -173,27 +173,27 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
                 }}
                 rows={3}
                 placeholder="Describe what you want to build (e.g. Build an interactive student grievance platform with complaint filtering, priority tags, status updates, and automated test cases...)"
-                className="w-full p-3 sm:p-3.5 rounded bg-[#050505] border border-white/10 text-white placeholder-white/30 font-mono text-xs sm:text-xs focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all resize-y"
+                className="w-full p-4 rounded-xl glass-input text-white placeholder-white/30 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all resize-y leading-relaxed"
               />
             </div>
 
             {/* Autonomy Mode Selector */}
             <div className="space-y-2">
-              <label className="text-[10px] font-mono uppercase tracking-wider text-white/50 flex items-center space-x-1.5">
-                <ShieldCheck className="w-3 h-3 text-cyan-400" />
+              <label className="text-[10px] font-mono uppercase tracking-wider text-white/70 flex items-center space-x-1.5 font-bold">
+                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
                 <span>AUTONOMY SUPERVISION POLICY</span>
               </label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3">
                 <div
                   onClick={() => setSelectedMode('MAXIMUM')}
-                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                  className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
                     selectedMode === 'MAXIMUM'
-                      ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-[0_0_12px_rgba(6,182,212,0.2)]'
-                      : 'bg-black/40 border-white/5 text-white/50 hover:border-white/20'
+                      ? 'glass-card-active text-white'
+                      : 'glass-card text-white/60 hover:text-white'
                   }`}
                 >
-                  <div className="flex items-center space-x-2 font-bold text-xs text-cyan-400 font-mono">
-                    <Zap className="w-3 h-3 shrink-0" />
+                  <div className="flex items-center space-x-2 font-bold text-xs text-cyan-300 font-mono">
+                    <Zap className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
                     <span>MAXIMUM AUTONOMY</span>
                   </div>
                   <p className="text-[10px] text-white/50 mt-1 leading-relaxed">
@@ -203,14 +203,14 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
 
                 <div
                   onClick={() => setSelectedMode('BALANCED')}
-                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                  className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
                     selectedMode === 'BALANCED'
-                      ? 'bg-blue-500/10 border-blue-500 text-white shadow-[0_0_12px_rgba(59,130,246,0.2)]'
-                      : 'bg-black/40 border-white/5 text-white/50 hover:border-white/20'
+                      ? 'glass-card-active border-blue-500/50 text-white'
+                      : 'glass-card text-white/60 hover:text-white'
                   }`}
                 >
-                  <div className="flex items-center space-x-2 font-bold text-xs text-blue-400 font-mono">
-                    <ShieldCheck className="w-3 h-3 shrink-0" />
+                  <div className="flex items-center space-x-2 font-bold text-xs text-blue-300 font-mono">
+                    <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-blue-400" />
                     <span>BALANCED SUPERVISION</span>
                   </div>
                   <p className="text-[10px] text-white/50 mt-1 leading-relaxed">
@@ -220,14 +220,14 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
 
                 <div
                   onClick={() => setSelectedMode('HUMAN_APPROVAL')}
-                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                  className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
                     selectedMode === 'HUMAN_APPROVAL'
-                      ? 'bg-amber-500/10 border-amber-500 text-white shadow-[0_0_12px_rgba(245,158,11,0.2)]'
-                      : 'bg-black/40 border-white/5 text-white/50 hover:border-white/20'
+                      ? 'glass-card-active border-amber-500/50 text-white'
+                      : 'glass-card text-white/60 hover:text-white'
                   }`}
                 >
-                  <div className="flex items-center space-x-2 font-bold text-xs text-amber-400 font-mono">
-                    <Lock className="w-3 h-3 shrink-0" />
+                  <div className="flex items-center space-x-2 font-bold text-xs text-amber-300 font-mono">
+                    <Lock className="w-3.5 h-3.5 shrink-0 text-amber-400" />
                     <span>STRICT SUPERVISOR</span>
                   </div>
                   <p className="text-[10px] text-white/50 mt-1 leading-relaxed">
@@ -239,22 +239,22 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
 
             {/* Quick Inspiration Prompts */}
             <div className="space-y-2">
-              <label className="text-[10px] font-mono uppercase tracking-wider text-white/40">
+              <label className="text-[10px] font-mono uppercase tracking-wider text-white/50 font-bold">
                 OR SELECT AN EXAMPLE OBJECTIVE:
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                 {PROMPT_SUGGESTIONS.map((item, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => handleSelectSuggestion(item.prompt)}
-                    className="p-3 text-left rounded-lg bg-black/40 hover:bg-white/5 border border-white/5 hover:border-white/20 transition-all group"
+                    className="p-3.5 text-left rounded-xl glass-card border border-white/10 hover:border-cyan-500/40 transition-all group"
                   >
-                    <div className="text-xs font-semibold text-white/90 group-hover:text-cyan-400 transition-colors flex items-center justify-between font-mono">
+                    <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors flex items-center justify-between font-mono">
                       <span className="truncate">{item.title}</span>
-                      <ArrowRight className="w-3 h-3 text-white/30 group-hover:text-cyan-400 transition-transform group-hover:translate-x-0.5 shrink-0" />
+                      <ArrowRight className="w-3.5 h-3.5 text-white/30 group-hover:text-cyan-300 transition-transform group-hover:translate-x-0.5 shrink-0" />
                     </div>
-                    <p className="text-[10px] text-white/40 mt-1 line-clamp-2 leading-relaxed">
+                    <p className="text-[10px] text-white/45 mt-1.5 line-clamp-2 leading-relaxed">
                       {item.desc}
                     </p>
                   </button>
@@ -264,24 +264,24 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
 
             {/* Action Bar */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 pt-4 border-t border-white/10">
-              <div className="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-4 text-[9px] sm:text-[10px] text-white/50 font-mono">
+              <div className="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-4 text-[10px] text-white/60 font-mono">
                 <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                  <CheckCircle2 className="w-3 h-3 text-green-400 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0" />
                   <span className="truncate">NO MOCK</span>
                 </span>
                 <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                  <CheckCircle2 className="w-3 h-3 text-cyan-400 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                   <span className="truncate">REAL DISK</span>
                 </span>
                 <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                  <CheckCircle2 className="w-3 h-3 text-blue-400 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                   <span className="truncate">NODE TESTS</span>
                 </span>
               </div>
 
               <button
                 type="submit"
-                className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-2.5 sm:py-3 rounded bg-cyan-500 hover:bg-cyan-400 text-black font-mono font-bold text-xs shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all cursor-pointer shrink-0"
+                className="w-full sm:w-auto flex items-center justify-center space-x-2.5 px-7 py-3 rounded-xl glass-button-primary text-black font-mono font-bold text-xs shadow-[0_0_20px_rgba(6,182,212,0.5)] transition-all cursor-pointer shrink-0"
               >
                 <Play className="w-3.5 h-3.5 fill-black shrink-0" />
                 <span>START AUTONOMOUS BUILD</span>

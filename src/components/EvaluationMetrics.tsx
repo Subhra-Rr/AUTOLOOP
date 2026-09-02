@@ -70,42 +70,42 @@ export function EvaluationMetrics({ project }: EvaluationMetricsProps) {
   return (
     <div className="space-y-6">
       {/* Overall Score Banner */}
-      <div className="p-4 sm:p-5 rounded-lg bg-[#0a0a0a]/50 border border-white/10 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="space-y-1.5">
-          <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[10px] font-mono font-bold tracking-wider">
-            <Sparkles className="w-3 h-3" />
+      <div className="p-5 sm:p-6 rounded-2xl glass-panel border border-white/10 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 backdrop-blur-2xl">
+        <div className="space-y-2">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full glass-card border border-cyan-500/30 text-cyan-300 text-[10px] font-mono font-bold tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
             <span>MEASURED WORKSPACE QUALITY & VERIFICATION</span>
           </div>
-          <h2 className="text-xl font-bold font-mono text-white tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-bold font-mono text-white tracking-tight">
             INDEPENDENT VERIFICATION REPORT
           </h2>
-          <p className="text-[11px] text-white/50 max-w-xl leading-relaxed font-sans">
+          <p className="text-[11px] sm:text-xs text-white/60 max-w-xl leading-relaxed font-sans">
             Metrics evaluated directly from workspace files, Node test runner outcomes, and static security analysis.
           </p>
         </div>
 
         {/* Real Score Gauge */}
-        <div className="flex items-center space-x-4 bg-black/40 p-3 rounded-lg border border-white/10">
+        <div className="flex items-center space-x-4 glass-card p-4 rounded-2xl border border-white/10 shadow-xl">
           <div className="text-center px-2">
-            <span className="text-[9px] font-mono uppercase tracking-widest text-white/40 block">
+            <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 block font-bold">
               STATUS
             </span>
-            <span className={`text-xl font-bold font-mono ${isCompleted ? 'text-green-400' : 'text-cyan-400'}`}>
+            <span className={`text-xl font-bold font-mono ${isCompleted ? 'text-emerald-400' : 'text-cyan-300'}`}>
               {isCompleted ? 'VERIFIED' : project.status}
             </span>
           </div>
-          <div className="h-8 w-px bg-white/10" />
+          <div className="h-9 w-px bg-white/10" />
           <div className="text-center px-2">
-            <span className="text-[9px] font-mono uppercase tracking-widest text-white/40 block">
+            <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 block font-bold">
               FILES
             </span>
-            <span className="text-xl font-bold font-mono text-cyan-400">
+            <span className="text-xl font-bold font-mono text-cyan-300">
               {project.files.length}
             </span>
           </div>
-          <div className="h-8 w-px bg-white/10" />
+          <div className="h-9 w-px bg-white/10" />
           <div className="text-center px-2">
-            <span className="text-[9px] font-mono uppercase tracking-widest text-white/40 block">
+            <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 block font-bold">
               SCORE
             </span>
             <span className="text-2xl font-bold font-mono text-blue-400">
@@ -116,30 +116,30 @@ export function EvaluationMetrics({ project }: EvaluationMetricsProps) {
       </div>
 
       {/* Quantitative Grid */}
-      <div className="space-y-2.5">
-        <h3 className="text-[10px] font-mono uppercase tracking-widest text-white/70 font-bold flex items-center space-x-2">
-          <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+      <div className="space-y-3">
+        <h3 className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-white/80 font-bold flex items-center space-x-2">
+          <Terminal className="w-4 h-4 text-cyan-400" />
           <span>MEASURED WORKSPACE INVARIANTS</span>
         </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {quantCards.map((card) => (
             <div
               key={card.label}
-              className="p-3 rounded-lg bg-[#0a0a0a]/50 border border-white/10 font-mono"
+              className="p-4 rounded-2xl glass-panel border border-white/10 font-mono shadow-xl backdrop-blur-2xl"
             >
-              <span className="text-[9px] text-white/40 block truncate">
+              <span className="text-[9px] text-white/50 block truncate font-bold uppercase tracking-wider">
                 {card.label}
               </span>
-              <div className="flex items-center justify-between mt-1">
-                <span className="text-sm font-bold text-white truncate">
+              <div className="flex items-center justify-between mt-1.5">
+                <span className="text-sm sm:text-base font-bold text-white truncate">
                   {card.val}
                 </span>
                 {card.status === 'PASS' ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0 ml-1" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 ml-1" />
                 ) : card.status === 'FAIL' ? (
-                  <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0 ml-1" />
+                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0 ml-1" />
                 ) : (
-                  <AlertCircle className="w-3.5 h-3.5 text-yellow-400 shrink-0 ml-1" />
+                  <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 ml-1" />
                 )}
               </div>
             </div>
@@ -149,39 +149,39 @@ export function EvaluationMetrics({ project }: EvaluationMetricsProps) {
 
       {/* Qualitative AI Pillars Breakdown */}
       {evaluation.categories && evaluation.categories.length > 0 && (
-        <div className="space-y-2.5">
-          <h3 className="text-[10px] font-mono uppercase tracking-widest text-white/70 font-bold flex items-center space-x-2">
-            <LineChart className="w-3.5 h-3.5 text-blue-400" />
+        <div className="space-y-3">
+          <h3 className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-white/80 font-bold flex items-center space-x-2">
+            <LineChart className="w-4 h-4 text-blue-400" />
             <span>MEASURED VERIFICATION PILLARS</span>
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             {evaluation.categories.map((cat) => (
               <div
                 key={cat.name}
-                className="p-3.5 rounded-lg bg-[#0a0a0a]/50 border border-white/10 space-y-2"
+                className="p-4 rounded-2xl glass-panel border border-white/10 space-y-2.5 shadow-xl backdrop-blur-2xl"
               >
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-semibold text-white/90 font-mono">
+                  <h4 className="text-xs sm:text-sm font-semibold text-white/95 font-mono">
                     {cat.name}
                   </h4>
-                  <span className="text-xs font-bold font-mono text-cyan-400">
+                  <span className="text-xs sm:text-sm font-bold font-mono text-cyan-300">
                     {cat.score}%
                   </span>
                 </div>
 
                 {/* Progress bar */}
-                <div className="w-full bg-black/40 rounded-full h-1 overflow-hidden border border-white/5">
+                <div className="w-full bg-black/40 rounded-full h-1.5 overflow-hidden border border-white/10">
                   <div
-                    className="bg-cyan-500 h-full rounded-full shadow-[0_0_8px_rgba(6,182,212,0.4)]"
+                    className="bg-cyan-400 h-full rounded-full shadow-[0_0_10px_rgba(6,182,212,0.6)]"
                     style={{ width: `${cat.score}%` }}
                   />
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] font-mono text-white/40">
-                  <span className="text-green-400 font-semibold">{cat.verdict}</span>
+                <div className="flex items-center justify-between text-[10px] font-mono text-white/50">
+                  <span className="text-emerald-400 font-semibold">{cat.verdict}</span>
                 </div>
 
-                <p className="text-[10px] text-white/50 font-sans leading-relaxed">
+                <p className="text-[10px] sm:text-[11px] text-white/60 font-sans leading-relaxed">
                   {cat.details}
                 </p>
               </div>

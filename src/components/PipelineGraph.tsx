@@ -50,21 +50,21 @@ export function PipelineGraph({ project, onSelectNode }: PipelineGraphProps) {
   };
 
   return (
-    <div className="p-3.5 sm:p-5 rounded-lg bg-[#0a0a0a]/60 border border-white/10 backdrop-blur-md shadow-2xl space-y-3 sm:space-y-4">
+    <div className="p-4 sm:p-5 rounded-2xl glass-panel border border-white/10 shadow-2xl space-y-3.5 sm:space-y-4 backdrop-blur-2xl">
       {/* Header bar */}
       <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2">
         <div className="flex items-center space-x-2">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)] animate-pulse" />
-          <h3 className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-white/70">
+          <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.9)] animate-pulse" />
+          <h3 className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-white/80">
             AUTONOMOUS EXECUTION GRAPH
           </h3>
         </div>
         <div className="flex items-center space-x-2 sm:space-x-3 text-[10px] font-mono">
-          <span className="text-white/40">
-            STAGE: <strong className="text-cyan-400 font-semibold">{project.activeNode}</strong>
+          <span className="text-white/50">
+            STAGE: <strong className="text-cyan-300 font-bold">{project.activeNode}</strong>
           </span>
           {isRepairActive && (
-            <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30 text-[9px] sm:text-[10px] font-bold shadow-[0_0_8px_rgba(239,68,68,0.4)] animate-pulse">
+            <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-red-500/20 text-red-300 border border-red-500/40 text-[9px] sm:text-[10px] font-bold shadow-[0_0_12px_rgba(239,68,68,0.4)] animate-pulse">
               <RotateCw className="w-2.5 h-2.5 animate-spin" />
               <span>REPAIR_LOOP</span>
             </span>
@@ -80,7 +80,7 @@ export function PipelineGraph({ project, onSelectNode }: PipelineGraphProps) {
 
           {/* Animated Glowing Signal Line */}
           <div 
-            className="absolute top-1/2 left-6 h-0.5 bg-gradient-to-r from-cyan-500 via-green-400 to-cyan-400 -translate-y-1/2 z-0 transition-all duration-700 shadow-[0_0_10px_rgba(6,182,212,0.6)]"
+            className="absolute top-1/2 left-6 h-0.5 bg-gradient-to-r from-cyan-400 via-emerald-400 to-cyan-300 -translate-y-1/2 z-0 transition-all duration-700 shadow-[0_0_12px_rgba(6,182,212,0.7)]"
             style={{ 
               width: `${Math.min(100, Math.max(5, (currentNodeIndex / (nodes.length - 1)) * 100))}%` 
             }}
@@ -89,7 +89,7 @@ export function PipelineGraph({ project, onSelectNode }: PipelineGraphProps) {
           {/* Repair Loop Arc Highlight (if repair active or completed) */}
           {project.repairHistory.length > 0 && (
             <div className="absolute top-0 right-[25%] left-[50%] h-7 sm:h-8 border-t-2 border-dashed border-red-500/60 rounded-t-full pointer-events-none -translate-y-2 sm:-translate-y-3 z-0 flex items-center justify-center">
-              <span className="bg-[#0a0a0a] px-2 text-[8px] sm:text-[9px] font-mono text-red-400 border border-red-500/30 rounded">
+              <span className="glass-panel px-2.5 py-0.5 text-[8px] sm:text-[9px] font-mono text-red-400 border border-red-500/40 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.3)]">
                 TEST → REPAIR → RETEST
               </span>
             </div>
@@ -100,36 +100,37 @@ export function PipelineGraph({ project, onSelectNode }: PipelineGraphProps) {
             const Icon = node.icon;
             const status = getNodeStatus(node.id, idx);
 
-            let nodeStyle = 'bg-black/40 border border-white/5 text-white/30';
+            let nodeStyle = 'glass-card border-white/10 text-white/30';
 
             if (status === 'COMPLETED') {
-              nodeStyle = 'bg-green-500/10 border border-green-500/40 text-green-400 shadow-[0_0_8px_rgba(34,197,94,0.3)]';
+              nodeStyle = 'bg-emerald-500/15 border-emerald-500/50 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.35)]';
             } else if (node.id === 'REPAIR' && isRepairActive) {
-              nodeStyle = 'bg-red-500/15 border-2 border-red-500 text-red-400 scale-110 shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-pulse';
+              nodeStyle = 'bg-red-500/20 border-2 border-red-400 text-red-300 scale-110 shadow-[0_0_18px_rgba(239,68,68,0.6)] animate-pulse';
             } else if (status === 'ACTIVE') {
-              nodeStyle = 'bg-cyan-500/15 border-2 border-cyan-400 text-cyan-300 scale-110 shadow-[0_0_15px_rgba(6,182,212,0.5)]';
+              nodeStyle = 'glass-card-active border-2 border-cyan-400 text-cyan-300 scale-110 shadow-[0_0_18px_rgba(6,182,212,0.6)]';
             }
 
             return (
               <div
                 key={node.id}
                 onClick={() => onSelectNode?.(node.id)}
-                className="relative z-10 flex flex-col items-center cursor-pointer group transition-all duration-300 shrink-0"
+                className="relative z-10 flex flex-col items-center cursor-pointer group transition-all duration-300 shrink-0 transform hover:-translate-y-1 active:scale-95"
+                title={`Stage: ${node.label} (${node.desc})`}
               >
-                {/* Node circular/square box */}
-                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all duration-300 ${nodeStyle}`}>
-                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:scale-110" />
+                {/* Node circular/square box with subtle scale up on hover */}
+                <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center transition-all duration-300 backdrop-blur-md group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.45)] group-hover:border-cyan-400/60 ${nodeStyle}`}>
+                  <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5 transition-transform duration-300 group-hover:scale-115" />
                 </div>
 
                 {/* Node Label */}
-                <span className={`text-[9px] sm:text-[10px] font-mono font-bold mt-1.5 sm:mt-2 tracking-wider ${
-                  status === 'ACTIVE' ? 'text-cyan-400' : status === 'COMPLETED' ? 'text-green-400' : 'text-white/40'
+                <span className={`text-[9px] sm:text-[10px] font-mono font-bold mt-1.5 sm:mt-2 tracking-wider transition-all duration-300 group-hover:text-cyan-300 group-hover:scale-105 ${
+                  status === 'ACTIVE' ? 'text-cyan-300 drop-shadow-[0_0_6px_rgba(6,182,212,0.6)]' : status === 'COMPLETED' ? 'text-emerald-400' : 'text-white/40'
                 }`}>
                   {node.label}
                 </span>
 
                 {/* Subtitle / Agent role */}
-                <span className="text-[7px] sm:text-[8px] font-mono text-white/30 text-center truncate max-w-[60px] sm:max-w-[65px] uppercase">
+                <span className="text-[7px] sm:text-[8px] font-mono text-white/40 text-center truncate max-w-[60px] sm:max-w-[65px] uppercase transition-colors duration-300 group-hover:text-white/80">
                   {node.agent.split('_')[0]}
                 </span>
               </div>
@@ -139,26 +140,26 @@ export function PipelineGraph({ project, onSelectNode }: PipelineGraphProps) {
       </div>
 
       {/* Node activity bar summary */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2.5 sm:pt-3 border-t border-white/10 text-[9px] sm:text-[10px] font-mono">
-        <div className="flex items-center space-x-1.5 text-white/40 truncate">
-          <span className="shrink-0">TASK:</span>
-          <span className="text-white font-semibold truncate">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-3 border-t border-white/10 text-[9px] sm:text-[10px] font-mono">
+        <div className="flex items-center space-x-1.5 text-white/50 truncate">
+          <span className="shrink-0 font-bold text-white/70">ACTIVE TASK:</span>
+          <span className="text-cyan-300 font-semibold truncate">
             {project.currentTaskId 
               ? `${project.tasks.find(t => t.id === project.currentTaskId)?.code}: ${project.tasks.find(t => t.id === project.currentTaskId)?.title}`
               : project.status === 'COMPLETED' ? 'ALL TASKS VERIFIED' : 'ENGINE READY'}
           </span>
         </div>
-        <div className="flex items-center space-x-3 sm:space-x-4 text-white/40 shrink-0">
+        <div className="flex items-center space-x-3 sm:space-x-4 text-white/50 shrink-0">
           <span className="flex items-center space-x-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
             <span>COMPLETED ({project.metrics.completedTasks}/10)</span>
           </span>
           <span className="flex items-center space-x-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)] animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.9)] animate-pulse" />
             <span>ACTIVE</span>
           </span>
           <span className="flex items-center space-x-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(245,158,11,0.5)]" />
             <span>REPAIRS ({project.metrics.repairCyclesCount})</span>
           </span>
         </div>

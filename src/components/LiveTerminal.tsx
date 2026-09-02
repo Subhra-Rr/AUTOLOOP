@@ -103,18 +103,18 @@ export function LiveTerminal({ logs, onClearLogs }: LiveTerminalProps) {
   });
 
   return (
-    <div className="flex flex-col h-full rounded-lg bg-black/40 border border-white/5 shadow-2xl overflow-hidden font-mono">
+    <div className="flex flex-col h-full rounded-2xl glass-panel border border-white/10 shadow-2xl overflow-hidden font-mono backdrop-blur-2xl">
       {/* Terminal Title Bar */}
-      <div className="h-8 bg-white/5 border-b border-white/5 flex items-center justify-between px-4 select-none">
+      <div className="h-9 glass-panel-subtle border-b border-white/10 flex items-center justify-between px-4 select-none">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-1.5">
-            <div className="w-2 h-2 rounded-full bg-red-500/50" />
-            <div className="w-2 h-2 rounded-full bg-yellow-500/50" />
-            <div className="w-2 h-2 rounded-full bg-green-500/50" />
+            <div className="w-2.5 h-2.5 rounded-full bg-red-500/70 shadow-[0_0_6px_rgba(239,68,68,0.5)]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70 shadow-[0_0_6px_rgba(234,179,8,0.5)]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/70 shadow-[0_0_6px_rgba(16,185,129,0.5)]" />
           </div>
           <div className="flex items-center space-x-2 pl-2 border-l border-white/10">
-            <TerminalIcon className="w-3 h-3 text-cyan-400" />
-            <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">
+            <TerminalIcon className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">
               AUTONOMOUS_EXECUTION_STREAM
             </span>
           </div>
@@ -125,84 +125,84 @@ export function LiveTerminal({ logs, onClearLogs }: LiveTerminalProps) {
           <button
             onClick={() => setAutoScroll(!autoScroll)}
             title={autoScroll ? 'Auto-scroll enabled' : 'Auto-scroll disabled'}
-            className={`p-1 rounded border transition-colors ${
-              autoScroll ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40' : 'bg-white/5 text-white/40 border-white/10'
+            className={`p-1.5 rounded-lg border transition-all ${
+              autoScroll ? 'glass-card-active text-cyan-300 shadow-[0_0_8px_rgba(6,182,212,0.3)]' : 'glass-button text-white/50 border-white/10'
             }`}
           >
-            {autoScroll ? <Lock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}
+            {autoScroll ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
           </button>
 
           <button
             onClick={handleCopyLogs}
             title="Copy logs to clipboard"
-            className="p-1 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 transition-colors"
+            className="p-1.5 rounded-lg glass-button text-white/70 hover:text-white border border-white/10 transition-all"
           >
-            {copied ? <Check className="w-2.5 h-2.5 text-green-400" /> : <Copy className="w-2.5 h-2.5" />}
+            {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
           </button>
 
           <button
             onClick={handleExportLogs}
             title="Export JSON logs"
-            className="p-1 rounded bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 transition-colors"
+            className="p-1.5 rounded-lg glass-button text-white/70 hover:text-white border border-white/10 transition-all"
           >
-            <Download className="w-2.5 h-2.5" />
+            <Download className="w-3 h-3" />
           </button>
 
           {onClearLogs && (
             <button
               onClick={onClearLogs}
               title="Clear terminal"
-              className="p-1 rounded bg-white/5 hover:bg-white/10 text-white/40 hover:text-red-400 border border-white/10 transition-colors"
+              className="p-1.5 rounded-lg glass-button text-white/50 hover:text-red-400 border border-white/10 transition-all"
             >
-              <Trash2 className="w-2.5 h-2.5" />
+              <Trash2 className="w-3 h-3" />
             </button>
           )}
         </div>
       </div>
 
       {/* Filter and Search Sub-bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 bg-[#0a0a0a]/60 border-b border-white/5 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 glass-panel-subtle border-b border-white/10 text-xs">
         <div className="flex items-center space-x-2">
           {/* Level Filter */}
           <select
             value={filterLevel}
             onChange={(e) => setFilterLevel(e.target.value)}
-            className="bg-[#050505] border border-white/10 rounded px-2 py-0.5 text-[10px] text-white/80 focus:outline-none focus:border-cyan-500 font-mono"
+            className="glass-input rounded-lg px-2.5 py-1 text-[10px] text-white/90 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono"
           >
-            <option value="ALL">ALL LEVELS</option>
-            <option value="INFO">INFO</option>
-            <option value="SUCCESS">SUCCESS</option>
-            <option value="WARN">WARN</option>
-            <option value="ERROR">ERROR</option>
-            <option value="SECURITY">SECURITY</option>
+            <option value="ALL" className="bg-slate-900 text-white">ALL LEVELS</option>
+            <option value="INFO" className="bg-slate-900 text-white">INFO</option>
+            <option value="SUCCESS" className="bg-slate-900 text-emerald-400">SUCCESS</option>
+            <option value="WARN" className="bg-slate-900 text-amber-400">WARN</option>
+            <option value="ERROR" className="bg-slate-900 text-red-400">ERROR</option>
+            <option value="SECURITY" className="bg-slate-900 text-cyan-300">SECURITY</option>
           </select>
 
           {/* Agent Filter */}
           <select
             value={filterAgent}
             onChange={(e) => setFilterAgent(e.target.value)}
-            className="bg-[#050505] border border-white/10 rounded px-2 py-0.5 text-[10px] text-white/80 focus:outline-none focus:border-cyan-500 font-mono"
+            className="glass-input rounded-lg px-2.5 py-1 text-[10px] text-white/90 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono"
           >
-            <option value="ALL">ALL AGENTS</option>
-            <option value="ORCHESTRATOR">Orchestrator</option>
-            <option value="PLANNER">Planner</option>
-            <option value="DEVELOPER">Developer</option>
-            <option value="TESTER">Tester</option>
-            <option value="REPAIR_AGENT">Repair Agent</option>
-            <option value="SECURITY_ANALYZER">Security Analyzer</option>
-            <option value="FINAL_EVALUATOR">Final Evaluator</option>
+            <option value="ALL" className="bg-slate-900 text-white">ALL AGENTS</option>
+            <option value="ORCHESTRATOR" className="bg-slate-900 text-purple-300">Orchestrator</option>
+            <option value="PLANNER" className="bg-slate-900 text-blue-300">Planner</option>
+            <option value="DEVELOPER" className="bg-slate-900 text-cyan-300">Developer</option>
+            <option value="TESTER" className="bg-slate-900 text-yellow-300">Tester</option>
+            <option value="REPAIR_AGENT" className="bg-slate-900 text-red-300">Repair Agent</option>
+            <option value="SECURITY_ANALYZER" className="bg-slate-900 text-emerald-300">Security Analyzer</option>
+            <option value="FINAL_EVALUATOR" className="bg-slate-900 text-cyan-300">Final Evaluator</option>
           </select>
         </div>
 
         {/* Search Box */}
         <div className="relative">
-          <Search className="w-2.5 h-2.5 text-white/30 absolute left-2 top-1/2 -translate-y-1/2" />
+          <Search className="w-3 h-3 text-white/40 absolute left-2.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="FILTER LOGS..."
-            className="pl-6 pr-2 py-0.5 bg-[#050505] border border-white/10 rounded text-[10px] text-white/90 placeholder-white/30 focus:outline-none focus:border-cyan-500 w-36 sm:w-48 font-mono uppercase"
+            className="pl-7 pr-2.5 py-1 glass-input rounded-lg text-[10px] text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-cyan-500 w-36 sm:w-48 font-mono uppercase"
           />
         </div>
       </div>
@@ -210,24 +210,24 @@ export function LiveTerminal({ logs, onClearLogs }: LiveTerminalProps) {
       {/* Terminal Log Output Stream */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-3 space-y-2 text-[11px] leading-relaxed select-text bg-[#050505]/95"
+        className="flex-1 overflow-y-auto p-3.5 space-y-2 text-[11px] leading-relaxed select-text bg-black/40 backdrop-blur-md"
       >
         {filteredLogs.length === 0 ? (
-          <div className="text-white/30 italic py-8 text-center text-xs">
+          <div className="text-white/40 italic py-8 text-center text-xs">
             NO STREAMING EVENTS CAPTURED
           </div>
         ) : (
           filteredLogs.map((log) => {
             const isCodeWrite = log.message.includes('[Tool: writeFile]') || log.message.includes('Wrote') || log.message.includes('|');
             return (
-              <div key={log.id} className="flex items-start space-x-2 group hover:bg-white/5 p-1.5 rounded transition-colors">
+              <div key={log.id} className="flex items-start space-x-2.5 group hover:bg-white/5 p-1.5 rounded-lg transition-colors">
                 {/* Timestamp */}
                 <span className="text-white/40 text-[10px] select-none shrink-0 font-mono pt-0.5">
                   [{log.timestamp}]
                 </span>
 
                 {/* Agent Badge */}
-                <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold border shrink-0 ${getAgentColor(log.agent)}`}>
+                <span className={`px-2 py-0.5 rounded-md text-[9px] uppercase font-bold border shrink-0 ${getAgentColor(log.agent)}`}>
                   {log.agent}
                 </span>
 
@@ -238,7 +238,7 @@ export function LiveTerminal({ logs, onClearLogs }: LiveTerminalProps) {
                       <div className={`font-semibold ${getLevelColor(log.level)}`}>
                         {log.message.split('\n')[0]}
                       </div>
-                      <pre className="p-2 rounded bg-black/60 border border-cyan-500/20 text-cyan-200/90 overflow-x-auto text-[10px] font-mono whitespace-pre leading-relaxed shadow-inner">
+                      <pre className="p-2.5 rounded-xl bg-black/70 border border-cyan-500/30 text-cyan-200/90 overflow-x-auto text-[10px] font-mono whitespace-pre leading-relaxed shadow-inner">
                         {log.message.split('\n').slice(1).join('\n')}
                       </pre>
                     </div>
@@ -255,12 +255,12 @@ export function LiveTerminal({ logs, onClearLogs }: LiveTerminalProps) {
       </div>
 
       {/* Terminal Status Bar */}
-      <div className="h-7 px-3 bg-white/5 border-t border-white/5 text-[9px] text-white/40 flex items-center justify-between select-none">
-        <span className="flex items-center space-x-1.5 text-green-400">
-          <ShieldCheck className="w-3 h-3" />
+      <div className="h-8 px-3.5 glass-panel-subtle border-t border-white/10 text-[9px] text-white/50 flex items-center justify-between select-none">
+        <span className="flex items-center space-x-1.5 text-emerald-400">
+          <ShieldCheck className="w-3.5 h-3.5" />
           <span>SECRET_REDACTION :: ENFORCED (API Keys & JWTs Protected)</span>
         </span>
-        <span>{filteredLogs.length} EVENTS STREAMED</span>
+        <span className="font-semibold">{filteredLogs.length} EVENTS STREAMED</span>
       </div>
     </div>
   );
