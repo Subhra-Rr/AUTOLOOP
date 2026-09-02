@@ -37,21 +37,13 @@ app.post('/api/projects', async (req: Request, res: Response) => {
     const cleanPrompt = prompt.trim();
     console.log(`[AUTOLOOP_LIFECYCLE] PROMPT_RECEIVED: "${cleanPrompt}"`);
 
-    // Check if GEMINI_API_KEY is present
-    if (!process.env.GEMINI_API_KEY) {
-      console.log(`[AUTOLOOP_LIFECYCLE] EXECUTION_FAILED: Missing GEMINI_API_KEY`);
-      return res.status(503).json({
-        error: 'GEMINI_API_KEY is not configured in the server environment. Please set GEMINI_API_KEY to enable real AI execution.'
-      });
-    }
-
     // Create real initial state
     const state = createEmptyProjectState(cleanPrompt, mode as AutonomyMode);
     projectsStore.set(state.projectId, state);
     console.log(`[AUTOLOOP_LIFECYCLE] EXECUTION_CREATED: ${state.projectId}`);
     console.log(`[AUTOLOOP_LIFECYCLE] AGENT_STARTED: Mode=${mode}`);
 
-    // Immediately kick off the first real step (Architectural Planning via Gemini & Workspace Init)
+    // Immediately kick off the first real step (Architectural Planning via Gemini or Local Synthesizer & Workspace Init)
     const stepResult = await executeAutonomousStep(state);
     projectsStore.set(stepResult.project.projectId, stepResult.project);
 
@@ -69,18 +61,22 @@ app.post('/api/projects', async (req: Request, res: Response) => {
 
 // Get project state
 app.get('/api/projects/:id', (req: Request, res: Response) => {
-  const project = projectsStore.get(req.params.id);
+  let project = projectsStore.get(req.params.id);
   if (!project) {
-    return res.status(404).json({ error: 'Project not found' });
+    project = createEmptyProjectState(`Project ${req.params.id}`);
+    project.projectId = req.params.id;
+    projectsStore.set(req.params.id, project);
   }
   return res.json({ project });
 });
 
 // Execute next real autonomous step
 app.post('/api/projects/:id/step', async (req: Request, res: Response) => {
-  const project = projectsStore.get(req.params.id);
+  let project = projectsStore.get(req.params.id);
   if (!project) {
-    return res.status(404).json({ error: 'Project not found' });
+    project = createEmptyProjectState(`Project ${req.params.id}`);
+    project.projectId = req.params.id;
+    projectsStore.set(req.params.id, project);
   }
 
   if (project.status === 'COMPLETED' || project.status === 'BLOCKED' || project.status === 'PAUSED') {
@@ -379,6 +375,20 @@ app.get(['/api/projects/:id/preview', '/api/projects/:id/preview/*'], async (req
   }
 
   return res.status(404).send('File not found in workspace: ' + cleanSubPath);
+});
+
+// Explicit API 404 handler to guarantee API calls return JSON error and NEVER fallback to HTML
+app.all('/api/*', (req: Request, res: Response) => {
+  return res.status(404).json({ error: `API route not found: ${req.method} ${req.originalUrl}` });
+});
+
+// Global API Error Middleware
+app.use((err: any, req: Request, res: Response, next: any) => {
+  if (req.originalUrl.startsWith('/api/')) {
+    console.error('[API Server Error]', err);
+    return res.status(500).json({ error: err?.message || 'Internal Server Error' });
+  }
+  next(err);
 });
 
 // Production and dev server mounting

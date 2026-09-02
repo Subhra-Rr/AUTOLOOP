@@ -19,6 +19,31 @@ import { DefinitionOfDone } from './components/DefinitionOfDone';
 import { CompletionReportModal } from './components/CompletionReportModal';
 import { HumanInterventionModal } from './components/HumanInterventionModal';
 
+// Safe API JSON Fetcher helper that never crashes with Unexpected token '<'
+async function safeFetchJson<T = any>(url: string, options?: RequestInit): Promise<{ ok: boolean; data: T; error?: string }> {
+  try {
+    const res = await fetch(url, options);
+    const contentType = res.headers.get('content-type') || '';
+    
+    if (contentType.includes('application/json')) {
+      const data = await res.json();
+      if (!res.ok) {
+        return { ok: false, data, error: data?.error || `Server responded with status ${res.status}` };
+      }
+      return { ok: true, data };
+    } else {
+      // Non-JSON response received (e.g. HTML error page or fallback)
+      const text = await res.text();
+      const cleanMsg = res.ok 
+        ? 'Received non-JSON response from server' 
+        : `Server Error (${res.status}): ${text.slice(0, 120)}`;
+      return { ok: false, data: {} as T, error: cleanMsg };
+    }
+  } catch (err: any) {
+    return { ok: false, data: {} as T, error: err?.message || 'Network communication error' };
+  }
+}
+
 export function App() {
   const [project, setProject] = useState<ProjectState | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTabType>('workspace');
@@ -33,37 +58,34 @@ export function App() {
 
   // Step runner loop
   const executeStep = async (projectId: string) => {
-    try {
-      const res = await fetch(`/api/projects/${projectId}/step`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      const data = await res.json();
+    const result = await safeFetchJson<any>(`/api/projects/${projectId}/step`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Step execution failed');
-      }
-      
-      if (data.project) {
-        setProject(data.project);
-        if (data.project.activeFilePath) {
-          setActiveFilePath(data.project.activeFilePath);
-        } else if (data.project.files.length > 0 && !data.project.files.some((f: any) => f.path === activeFilePath)) {
-          setActiveFilePath(data.project.files[0].path);
-        }
-      }
-
-      if (data.blocked) {
-        setIsRunning(false);
-        setGlobalError(data.error || 'Autonomous execution paused due to error.');
-      } else if (data.done) {
-        setIsRunning(false);
-        setShowCompletionModal(true);
-      }
-    } catch (err: any) {
-      console.error('Autonomous step error:', err);
+    if (!result.ok) {
+      console.warn('Autonomous step warning:', result.error);
       setIsRunning(false);
-      setGlobalError(err?.message || 'Autonomous step execution failed');
+      setGlobalError(result.error || 'Autonomous step execution failed');
+      return;
+    }
+
+    const data = result.data;
+    if (data.project) {
+      setProject(data.project);
+      if (data.project.activeFilePath) {
+        setActiveFilePath(data.project.activeFilePath);
+      } else if (data.project.files?.length > 0 && !data.project.files.some((f: any) => f.path === activeFilePath)) {
+        setActiveFilePath(data.project.files[0].path);
+      }
+    }
+
+    if (data.blocked) {
+      setIsRunning(false);
+      setGlobalError(data.error || 'Autonomous execution paused due to error.');
+    } else if (data.done) {
+      setIsRunning(false);
+      setShowCompletionModal(true);
     }
   };
 
@@ -88,64 +110,48 @@ export function App() {
   // Project creator handler
   const handleStartBuild = async (prompt: string, mode: AutonomyMode) => {
     setGlobalError(null);
-    try {
-      const res = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, mode, isLiveGemini: true })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to create autonomous project');
+    const result = await safeFetchJson<any>('/api/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, mode, isLiveGemini: true })
+    });
+
+    if (!result.ok) {
+      console.error('Build init error:', result.error);
+      setGlobalError(result.error || 'Failed to initialize real AI project');
+      return;
+    }
+
+    const data = result.data;
+    if (data.project) {
+      setProject(data.project);
+      setActiveTab('workspace');
+      if (data.project.files?.length > 0) {
+        setActiveFilePath(data.project.files[0].path);
       }
-      if (data.project) {
-        setProject(data.project);
-        setActiveTab('workspace');
-        if (data.project.files?.length > 0) {
-          setActiveFilePath(data.project.files[0].path);
-        }
-        setIsRunning(data.project.status !== 'BLOCKED' && data.project.status !== 'COMPLETED');
-      }
-    } catch (err: any) {
-      console.error('Build init error:', err);
-      setGlobalError(err?.message || 'Failed to initialize real AI project');
+      setIsRunning(data.project.status !== 'BLOCKED' && data.project.status !== 'COMPLETED');
     }
   };
 
   const handlePause = async () => {
     if (!project) return;
     setIsRunning(false);
-    try {
-      const res = await fetch(`/api/projects/${project.projectId}/pause`, { method: 'POST' });
-      const data = await res.json();
-      if (data.project) setProject(data.project);
-    } catch (err) {
-      console.error(err);
-    }
+    const result = await safeFetchJson<any>(`/api/projects/${project.projectId}/pause`, { method: 'POST' });
+    if (result.ok && result.data.project) setProject(result.data.project);
   };
 
   const handleResume = async () => {
     if (!project) return;
     setIsRunning(true);
-    try {
-      const res = await fetch(`/api/projects/${project.projectId}/resume`, { method: 'POST' });
-      const data = await res.json();
-      if (data.project) setProject(data.project);
-    } catch (err) {
-      console.error(err);
-    }
+    const result = await safeFetchJson<any>(`/api/projects/${project.projectId}/resume`, { method: 'POST' });
+    if (result.ok && result.data.project) setProject(result.data.project);
   };
 
   const handleAbort = async () => {
     if (!project) return;
     setIsRunning(false);
-    try {
-      const res = await fetch(`/api/projects/${project.projectId}/abort`, { method: 'POST' });
-      const data = await res.json();
-      if (data.project) setProject(data.project);
-    } catch (err) {
-      console.error(err);
-    }
+    const result = await safeFetchJson<any>(`/api/projects/${project.projectId}/abort`, { method: 'POST' });
+    if (result.ok && result.data.project) setProject(result.data.project);
   };
 
   const handleReset = () => {

@@ -1,0 +1,9 @@
+{
+  "name": "proj_s7qwp6p",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Scientific Calculator app with",
+  "scripts": {
+    "test": "node --test"
+  }
+}
