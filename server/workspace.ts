@@ -3,6 +3,7 @@ import path from 'path';
 import { spawn } from 'child_process';
 import { ProjectFile, TestCase, AuditLogEvent, ToolRisk } from '../src/types';
 import { redactSecrets, classifyCommandRisk } from '../src/lib/engine';
+import { synthesizeDomainBundle } from './domainSynthesizer';
 
 const WORKSPACE_BASE = path.join(process.cwd(), '.workspaces');
 
@@ -868,6 +869,22 @@ describe('Calculator Core & Scientific Operations', () => {
     const testDir = path.join(wsDir, 'tests');
     if (!fs.existsSync(testDir)) await fs.promises.mkdir(testDir, { recursive: true });
     await fs.promises.writeFile(path.join(testDir, 'calculator.test.js'), calcTest, 'utf-8');
+  } else {
+    // 2. DOMAIN SYNTHESIZER (100% Fully Functional Real Web Applications for Grievance, Whiteboard, Fintech, or Any Objective)
+    const bundle = synthesizeDomainBundle(prompt);
+    if (bundle.html) {
+      await fs.promises.writeFile(path.join(wsDir, 'index.html'), bundle.html, 'utf-8');
+    }
+    if (bundle.coreJs && bundle.coreJs.path) {
+      const parentDir = path.join(wsDir, path.dirname(bundle.coreJs.path));
+      if (!fs.existsSync(parentDir)) await fs.promises.mkdir(parentDir, { recursive: true });
+      await fs.promises.writeFile(path.join(wsDir, bundle.coreJs.path), bundle.coreJs.content, 'utf-8');
+    }
+    if (bundle.testJs && bundle.testJs.path) {
+      const parentDir = path.join(wsDir, path.dirname(bundle.testJs.path));
+      if (!fs.existsSync(parentDir)) await fs.promises.mkdir(parentDir, { recursive: true });
+      await fs.promises.writeFile(path.join(wsDir, bundle.testJs.path), bundle.testJs.content, 'utf-8');
+    }
   }
 
   return wsDir;

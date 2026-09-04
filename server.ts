@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 import { ProjectState, AutonomyMode } from './src/types';
 import { createEmptyProjectState, executeAutonomousStep } from './server/geminiOrchestrator';
-import { listWorkspaceFiles, readWorkspaceFile, getWorkspacePath } from './server/workspace';
+import { listWorkspaceFiles, readWorkspaceFile, getWorkspacePath, initProjectWorkspace } from './server/workspace';
 
 dotenv.config();
 

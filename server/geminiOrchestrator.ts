@@ -19,6 +19,7 @@ import {
   runWorkspaceTests, 
   runWorkspaceSecurityAudit 
 } from './workspace';
+import { synthesizeDomainBundle } from './domainSynthesizer';
 
 function getGemini(): GoogleGenAI | null {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -336,52 +337,13 @@ Return a strictly valid JSON object with the following schema:
             : `[Planner] Autonomous Engine synthesizing technical architecture and tasks.`
         });
 
-        const promptWords = project.originalUserPrompt.split(' ').slice(0, 4).join(' ');
-        const derivedName = promptWords.charAt(0).toUpperCase() + promptWords.slice(1);
+        const domainBundle = synthesizeDomainBundle(project.originalUserPrompt);
 
         planText = JSON.stringify({
-          projectName: derivedName || 'Precision Application',
-          description: `Production-ready application implementing: ${project.originalUserPrompt.slice(0, 100)}`,
-          requirements: [
-            'System Architecture & Core Domain Engine',
-            '100% Functional Interactive Interface (index.html)',
-            'Automated Test Suite with node:test Runner',
-            'Zero-Trust Security & Boundary Verification'
-          ],
-          tasks: [
-            {
-              code: 'TASK-001',
-              title: 'Synthesize Core Domain Entities & Calculation Engine',
-              description: 'Implement core modules, state management, and calculation contracts on disk.',
-              agent: 'DEVELOPER',
-              category: 'BACKEND',
-              dependencies: []
-            },
-            {
-              code: 'TASK-002',
-              title: 'Build Interactive Web Application Entry Point',
-              description: 'Create modern responsive index.html with active event handlers for all UI controls.',
-              agent: 'DEVELOPER',
-              category: 'FRONTEND',
-              dependencies: ['TASK-001']
-            },
-            {
-              code: 'TASK-003',
-              title: 'Generate Automated Node.js Test Suite',
-              description: 'Write comprehensive unit and integration tests using node:test and node:assert.',
-              agent: 'TESTER',
-              category: 'TESTING',
-              dependencies: ['TASK-002']
-            },
-            {
-              code: 'TASK-004',
-              title: 'Execute Zero-Trust Security & Artifact Verification',
-              description: 'Scan disk files for unredacted credentials and verify complete Definition of Done.',
-              agent: 'SECURITY_ANALYZER',
-              category: 'SECURITY',
-              dependencies: ['TASK-003']
-            }
-          ]
+          projectName: domainBundle.title,
+          description: domainBundle.description,
+          requirements: domainBundle.requirements,
+          tasks: domainBundle.tasks
         });
       }
 
@@ -676,7 +638,8 @@ Return a strictly valid JSON response with this schema:
       const isQuota = isQuotaExhaustedError(geminiTaskErr) || geminiTaskErr?.message?.includes('QUOTA_');
       console.log(`[AUTOLOOP_LIFECYCLE] Developer engine active: ${isQuota ? 'Quota cooldown' : 'Local synthesis'} for ${currentTask.code}`);
       
-      const isCalc = project.objective.toLowerCase().includes('calc') || project.objective.toLowerCase().includes('math') || project.objective.toLowerCase().includes('arithmetic');
+      const domainBundle = synthesizeDomainBundle(project.originalUserPrompt);
+      const isCalc = domainBundle.domain === 'CALCULATOR';
       
       if (currentTask.category === 'TESTING' || currentTask.code === 'TASK-003') {
         const testCode = isCalc ? `import test from 'node:test';
@@ -702,25 +665,11 @@ test('Calculator: advanced scientific operations', () => {
   assert.strictEqual(factorial(5), 120);
   assert.ok(Math.abs(PI - 3.14159) < 0.001);
 });
-` : `import test from 'node:test';
-import assert from 'node:assert';
-import { executeCoreWorkflow, validatePayload } from '../src/core.js';
-
-test('Core domain logic execution', () => {
-  const result = executeCoreWorkflow({ input: 'Test Workflow Payload' });
-  assert.strictEqual(result.success, true);
-  assert.ok(result.id);
-});
-
-test('Input validation rules', () => {
-  assert.strictEqual(validatePayload({ input: 'Valid' }), true);
-  assert.strictEqual(validatePayload(null), false);
-});
-`;
+` : domainBundle.testJs.content;
 
         taskResponseText = JSON.stringify({
           action: 'WRITE_FILE',
-          filePath: isCalc ? 'tests/calculator.test.js' : 'tests/core.test.js',
+          filePath: isCalc ? 'tests/calculator.test.js' : domainBundle.testJs.path,
           content: testCode,
           summary: 'Generate automated Node.js test suite.'
         });
@@ -729,46 +678,8 @@ test('Input validation rules', () => {
         const existingHtml = fullFiles.find(f => f.path.endsWith('.html') || f.path === 'index.html');
         let htmlContent = existingHtml ? existingHtml.content : '';
 
-        if (!htmlContent) {
-          htmlContent = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${project.name}</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #09090b; color: #f4f4f5; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-    .app-card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 28px; max-width: 520px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
-    h1 { font-size: 22px; font-weight: 700; color: #06b6d4; margin-bottom: 8px; }
-    p { color: #a1a1aa; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
-    .btn { background: #06b6d4; color: #000; font-weight: 600; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; transition: background 0.15s; }
-    .btn:hover { background: #22d3ee; }
-    .input-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
-    label { font-size: 12px; font-weight: 600; color: #71717a; text-transform: uppercase; }
-    input { background: #09090b; border: 1px solid #3f3f46; color: #fff; padding: 10px 12px; border-radius: 8px; font-size: 14px; }
-    .output-box { background: #09090b; border: 1px solid #27272a; border-radius: 8px; padding: 14px; margin-top: 16px; font-family: monospace; font-size: 13px; color: #34d399; }
-  </style>
-</head>
-<body>
-  <div class="app-card">
-    <h1>${project.name}</h1>
-    <p>${project.description}</p>
-    <div class="input-group">
-      <label for="actionInput">System Input</label>
-      <input type="text" id="actionInput" placeholder="Enter input data..." value="Active Parameter" />
-    </div>
-    <button id="submitBtn" class="btn">Execute Action</button>
-    <div id="outputDisplay" class="output-box">Ready for execution.</div>
-  </div>
-  <script>
-    document.getElementById('submitBtn')?.addEventListener('click', function() {
-      const val = document.getElementById('actionInput').value || 'Default';
-      document.getElementById('outputDisplay').textContent = '✓ Executed successfully with payload: "' + val + '" at ' + new Date().toLocaleTimeString();
-    });
-  </script>
-</body>
-</html>`;
+        if (!htmlContent || htmlContent.length < 50) {
+          htmlContent = domainBundle.html;
         }
 
         taskResponseText = JSON.stringify({
@@ -811,30 +722,13 @@ export function calculate(expr) {
   const sanitized = String(expr).replace(/[^0-9+\\-*\\/().\\s]/g, '');
   return Function('"use strict";return (' + sanitized + ')')();
 }
-` : `// Core application logic and state workflows
-export function validatePayload(payload) {
-  if (!payload || typeof payload !== 'object') return false;
-  return !!payload.input;
-}
-
-export function executeCoreWorkflow(payload) {
-  if (!validatePayload(payload)) {
-    throw new Error('Invalid workflow payload');
-  }
-  return {
-    success: true,
-    id: 'wf_' + Math.random().toString(36).substring(2, 9),
-    timestamp: new Date().toISOString(),
-    result: 'Workflow executed successfully for: ' + payload.input
-  };
-}
-`;
+` : domainBundle.coreJs.content;
 
         taskResponseText = JSON.stringify({
           action: 'WRITE_FILE',
-          filePath: isCalc ? 'src/calculator.js' : 'src/core.js',
+          filePath: isCalc ? 'src/calculator.js' : domainBundle.coreJs.path,
           content: coreCode,
-          summary: 'Implement core domain entity logic.'
+          summary: 'Synthesize core domain entities and calculation engine.'
         });
       }
     }

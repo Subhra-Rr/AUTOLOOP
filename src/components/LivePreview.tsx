@@ -239,15 +239,17 @@ export function LivePreview({ project }: LivePreviewProps) {
             {isFullscreen ? <Minimize2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Maximize2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
           </button>
 
-          {/* Open in New Window */}
-          <button
-            onClick={handleOpenNewTab}
+          {/* Open in New Window (Anchor tag for 100% mobile browser compatibility) */}
+          <a
+            href={previewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             title="Open Live App in Dedicated Tab"
-            className="flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-2.5 py-1 rounded bg-red-600 hover:bg-red-500 text-white text-xs font-mono font-bold transition-all shadow-[0_0_15px_rgba(239,68,68,0.5)] shrink-0"
+            className="flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-2.5 py-1 rounded bg-red-600 hover:bg-red-500 text-white text-xs font-mono font-bold transition-all shadow-[0_0_15px_rgba(239,68,68,0.5)] shrink-0 cursor-pointer"
           >
             <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-            <span className="hidden sm:inline">OPEN IN NEW TAB</span>
-          </button>
+            <span className="text-[10px] sm:text-xs font-bold">OPEN IN NEW TAB</span>
+          </a>
         </div>
       </div>
 

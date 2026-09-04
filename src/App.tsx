@@ -56,6 +56,7 @@ export function App() {
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [isTakingSnapshot, setIsTakingSnapshot] = useState<boolean>(false);
   const [restoreToast, setRestoreToast] = useState<string | null>(null);
+  const [isStartingBuild, setIsStartingBuild] = useState<boolean>(false);
 
   const loopTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -113,26 +114,31 @@ export function App() {
   // Project creator handler
   const handleStartBuild = async (prompt: string, mode: AutonomyMode) => {
     setGlobalError(null);
-    const result = await safeFetchJson<any>('/api/projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, mode, isLiveGemini: true })
-    });
+    setIsStartingBuild(true);
+    try {
+      const result = await safeFetchJson<any>('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, mode, isLiveGemini: true })
+      });
 
-    if (!result.ok) {
-      console.error('Build init error:', result.error);
-      setGlobalError(result.error || 'Failed to initialize real AI project');
-      return;
-    }
-
-    const data = result.data;
-    if (data.project) {
-      setProject(data.project);
-      setActiveTab('workspace');
-      if (data.project.files?.length > 0) {
-        setActiveFilePath(data.project.files[0].path);
+      if (!result.ok) {
+        console.error('Build init error:', result.error);
+        setGlobalError(result.error || 'Failed to initialize real AI project');
+        return;
       }
-      setIsRunning(data.project.status !== 'BLOCKED' && data.project.status !== 'COMPLETED');
+
+      const data = result.data;
+      if (data.project) {
+        setProject(data.project);
+        setActiveTab('workspace');
+        if (data.project.files?.length > 0) {
+          setActiveFilePath(data.project.files[0].path);
+        }
+        setIsRunning(data.project.status !== 'BLOCKED' && data.project.status !== 'COMPLETED');
+      }
+    } finally {
+      setIsStartingBuild(false);
     }
   };
 
@@ -327,7 +333,7 @@ export function App() {
       )}
 
       {!project ? (
-        <LandingPage onStartBuild={handleStartBuild} />
+        <LandingPage onStartBuild={handleStartBuild} isSubmitting={isStartingBuild} />
       ) : (
         <main className="flex-1 p-3 sm:p-4 lg:p-6 max-w-[1700px] w-full mx-auto space-y-4 sm:space-y-6 relative z-10">
           {/* Always Visible Pipeline Node Graph on Workspace Tab */}

@@ -18,6 +18,7 @@ import { AutonomyMode } from '../types';
 
 interface LandingPageProps {
   onStartBuild: (prompt: string, mode: AutonomyMode) => void;
+  isSubmitting?: boolean;
 }
 
 const PROMPT_SUGGESTIONS = [
@@ -43,7 +44,7 @@ const PROMPT_SUGGESTIONS = [
   }
 ];
 
-export function LandingPage({ onStartBuild }: LandingPageProps) {
+export function LandingPage({ onStartBuild, isSubmitting = false }: LandingPageProps) {
   const [prompt, setPrompt] = useState('');
   const [selectedMode, setSelectedMode] = useState<AutonomyMode>('MAXIMUM');
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -281,10 +282,20 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
 
               <button
                 type="submit"
-                className="w-full sm:w-auto flex items-center justify-center space-x-2.5 px-7 py-3 rounded-xl glass-button-primary text-white font-mono font-bold text-xs shadow-[0_0_22px_rgba(239,68,68,0.6)] transition-all cursor-pointer shrink-0"
+                disabled={isSubmitting}
+                className="w-full sm:w-auto flex items-center justify-center space-x-2.5 px-7 py-3 rounded-xl glass-button-primary text-white font-mono font-bold text-xs shadow-[0_0_22px_rgba(239,68,68,0.6)] transition-all cursor-pointer shrink-0 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <Play className="w-3.5 h-3.5 fill-white shrink-0" />
-                <span>START AUTONOMOUS BUILD</span>
+                {isSubmitting ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin shrink-0" />
+                    <span>LAUNCHING AUTONOMOUS BUILD...</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-3.5 h-3.5 fill-white shrink-0" />
+                    <span>START AUTONOMOUS BUILD</span>
+                  </>
+                )}
               </button>
             </div>
           </form>
