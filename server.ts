@@ -37,19 +37,18 @@ app.post('/api/projects', async (req: Request, res: Response) => {
     const cleanPrompt = prompt.trim();
     console.log(`[AUTOLOOP_LIFECYCLE] PROMPT_RECEIVED: "${cleanPrompt}"`);
 
-    // Create real initial state
+    // Create real initial state and initialize workspace directory immediately
     const state = createEmptyProjectState(cleanPrompt, mode as AutonomyMode);
+    await initProjectWorkspace(state.projectId, state.name, cleanPrompt);
     projectsStore.set(state.projectId, state);
     console.log(`[AUTOLOOP_LIFECYCLE] EXECUTION_CREATED: ${state.projectId}`);
     console.log(`[AUTOLOOP_LIFECYCLE] AGENT_STARTED: Mode=${mode}`);
 
-    // Immediately kick off the first real step (Architectural Planning via Gemini or Local Synthesizer & Workspace Init)
-    const stepResult = await executeAutonomousStep(state);
-    projectsStore.set(stepResult.project.projectId, stepResult.project);
-
+    // Return immediately to provide instant UI response (<50ms)
+    // The autonomous runner loop in the frontend will immediately trigger the first execution step
     return res.status(201).json({ 
       success: true, 
-      project: stepResult.project 
+      project: state 
     });
   } catch (err: any) {
     console.error(`[AUTOLOOP_LIFECYCLE] EXECUTION_FAILED:`, err);

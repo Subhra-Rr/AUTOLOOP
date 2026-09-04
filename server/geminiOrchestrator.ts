@@ -86,8 +86,10 @@ async function callGemini(
     throw new Error('NO_GEMINI_KEY: Server environment has no GEMINI_API_KEY set.');
   }
 
-  const models = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-flash-latest'];
+  // Prioritize active, fast, high-throughput models with independent quota pools
+  const models = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest'];
   let lastErr: any = null;
+  let allQuotaExhausted = true;
 
   for (const model of models) {
     try {
@@ -103,9 +105,9 @@ async function callGemini(
         config,
       });
 
-      // 15s timeout guard to prevent network hang while allowing LLM synthesis
+      // 25s timeout guard to prevent network hang while allowing LLM synthesis
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error(`Timeout: Gemini request to ${model} exceeded 15s`)), 15000);
+        setTimeout(() => reject(new Error(`Timeout: Gemini request to ${model} exceeded 25s`)), 25000);
       });
 
       const response: any = await Promise.race([callPromise, timeoutPromise]);
@@ -116,17 +118,23 @@ async function callGemini(
     } catch (err: any) {
       lastErr = err;
 
-      // If quota/rate limit error (429 / RESOURCE_EXHAUSTED), do NOT spam remaining models
+      // If quota/rate limit error (429 / RESOURCE_EXHAUSTED), attempt fallback model
       if (isQuotaExhaustedError(err)) {
-        const delayMs = parseRetryDelayMs(err);
-        quotaCooldownUntil = Date.now() + Math.min(Math.max(delayMs, 25000), 60000);
-        const cooldownSec = Math.ceil((quotaCooldownUntil - Date.now()) / 1000);
-        throw new Error(`QUOTA_EXHAUSTED: Gemini API free-tier quota reached. Circuit breaker cooling down for ${cooldownSec}s.`);
+        console.log(`[Gemini] Model ${model} returned 429 quota exhausted. Checking next fallback model...`);
+        continue;
       }
 
-      // If model not found or unavailable, try next model in loop
+      allQuotaExhausted = false;
+      // If model not found or timeout, try next model in loop
       continue;
     }
+  }
+
+  if (allQuotaExhausted && lastErr) {
+    const delayMs = parseRetryDelayMs(lastErr);
+    quotaCooldownUntil = Date.now() + Math.min(Math.max(delayMs, 20000), 45000);
+    const cooldownSec = Math.ceil((quotaCooldownUntil - Date.now()) / 1000);
+    throw new Error(`QUOTA_EXHAUSTED: Gemini API free-tier quota reached. Circuit breaker cooling down for ${cooldownSec}s.`);
   }
 
   throw lastErr || new Error('Gemini API generation failed.');

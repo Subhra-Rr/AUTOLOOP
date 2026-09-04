@@ -1408,18 +1408,15 @@ test('Finance: budget limit monitoring', () => {
   return { domain: 'EXPENSE', title, description, requirements, html, coreJs, testJs, tasks };
 }
 
-// 4. UNIVERSAL APPLICATION GENERATOR FOR ANY OTHER PROMPT
-function generateUniversalBundle(prompt: string): DomainBundle {
-  const cleanPrompt = prompt.trim();
-  const words = cleanPrompt.split(/\s+/).slice(0, 5).join(' ');
-  const appName = words.charAt(0).toUpperCase() + words.slice(1);
-  const title = appName;
-  const description = `Interactive production web application implementing: ${cleanPrompt.slice(0, 90)}`;
+// // 4. SCIENTIFIC CALCULATOR BUNDLE
+function generateCalculatorBundle(): DomainBundle {
+  const title = 'Precision Scientific Calculator & Grapher';
+  const description = 'Scientific arithmetic calculation engine with memory registers, history tape, and function plotting.';
   const requirements = [
-    `Core domain architecture tailored for: ${cleanPrompt.slice(0, 60)}`,
-    'Interactive responsive interface with dynamic data entries and actions',
-    'Local persistence, statistics calculations, and search filtering',
-    'Node.js unit test coverage verifying business logic'
+    'High-precision basic arithmetic (addition, subtraction, multiplication, division)',
+    'Scientific functions: square root, exponentiation, factorial, trigonometry, and constants (π, e)',
+    'Memory registers (MC, MR, MS, M+) and interactive history tape with recall',
+    'Keyboard event navigation and comprehensive unit test coverage'
   ];
 
   const html = `<!DOCTYPE html>
@@ -1427,45 +1424,608 @@ function generateUniversalBundle(prompt: string): DomainBundle {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Precision Scientific Calculator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #0c0d12; color: #f1f3f9; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    
+    .calculator-card {
+      background: #161822;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65), 0 0 30px rgba(6, 182, 212, 0.05);
+      width: 100%;
+      max-width: 420px;
+      overflow: hidden;
+    }
+    
+    .header {
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .header-left { display: flex; align-items: center; gap: 8px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; }
+    .app-title { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; color: #e2e8f0; }
+    .mode-badge { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); }
+
+    .display-area {
+      padding: 18px;
+      background: #10121a;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      min-height: 90px;
+      justify-content: flex-end;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .history-tape {
+      font-size: 13px;
+      color: #64748b;
+      min-height: 18px;
+      word-break: break-all;
+      font-family: monospace;
+    }
+    .main-display {
+      font-size: 34px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+      font-family: monospace;
+      word-break: break-all;
+    }
+
+    .memory-bar {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: #13151f;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .mem-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+    .mem-btn:hover { color: #38bdf8; background: rgba(56, 189, 248, 0.1); }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 16px;
+    }
+    .btn {
+      background: #1e2230;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      color: #f1f5f9;
+      font-size: 17px;
+      font-weight: 600;
+      border-radius: 12px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.12s ease;
+      touch-action: manipulation;
+    }
+    .btn:active { transform: scale(0.96); opacity: 0.85; }
+    .btn-op { background: #2a3044; color: #38bdf8; font-weight: 700; }
+    .btn-eq { background: linear-gradient(135deg, #0284c7, #06b6d4); color: #fff; font-weight: 800; }
+    .btn-clear { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
+    .btn-sci { background: #181d28; color: #a78bfa; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="calculator-card">
+    <div class="header">
+      <div class="header-left">
+        <div class="status-dot"></div>
+        <span class="app-title">Precision Scientific</span>
+      </div>
+      <span class="mode-badge">RAD / DEG</span>
+    </div>
+
+    <div class="display-area">
+      <div class="history-tape" id="historyDisplay"></div>
+      <div class="main-display" id="mainDisplay">0</div>
+    </div>
+
+    <div class="memory-bar">
+      <button class="mem-btn" onclick="memoryClear()">MC</button>
+      <button class="mem-btn" onclick="memoryRecall()">MR</button>
+      <button class="mem-btn" onclick="memoryAdd()">M+</button>
+      <button class="mem-btn" onclick="memorySubtract()">M-</button>
+      <button class="mem-btn" onclick="memoryStore()">MS</button>
+    </div>
+
+    <div class="keypad">
+      <button class="btn btn-sci" onclick="execFunc('sin')">sin</button>
+      <button class="btn btn-sci" onclick="execFunc('cos')">cos</button>
+      <button class="btn btn-sci" onclick="execFunc('tan')">tan</button>
+      <button class="btn btn-sci" onclick="execFunc('sqrt')">√</button>
+
+      <button class="btn btn-sci" onclick="execFunc('pow')">x^y</button>
+      <button class="btn btn-sci" onclick="execFunc('pi')">π</button>
+      <button class="btn btn-clear" onclick="clearAll()">AC</button>
+      <button class="btn btn-clear" onclick="backspace()">⌫</button>
+
+      <button class="btn" onclick="appendNum('7')">7</button>
+      <button class="btn" onclick="appendNum('8')">8</button>
+      <button class="btn" onclick="appendNum('9')">9</button>
+      <button class="btn btn-op" onclick="appendOp('/')">÷</button>
+
+      <button class="btn" onclick="appendNum('4')">4</button>
+      <button class="btn" onclick="appendNum('5')">5</button>
+      <button class="btn" onclick="appendNum('6')">6</button>
+      <button class="btn btn-op" onclick="appendOp('*')">×</button>
+
+      <button class="btn" onclick="appendNum('1')">1</button>
+      <button class="btn" onclick="appendNum('2')">2</button>
+      <button class="btn" onclick="appendNum('3')">3</button>
+      <button class="btn btn-op" onclick="appendOp('-')">−</button>
+
+      <button class="btn" onclick="appendNum('0')">0</button>
+      <button class="btn" onclick="appendDot()">.</button>
+      <button class="btn btn-eq" onclick="calculate()">=</button>
+      <button class="btn btn-op" onclick="appendOp('+')">+</button>
+    </div>
+  </div>
+
+  <script>
+    let currentInput = '0';
+    let previousInput = '';
+    let operation = null;
+    let resetOnNextInput = false;
+    let memory = 0;
+
+    const mainDisplay = document.getElementById('mainDisplay');
+    const historyDisplay = document.getElementById('historyDisplay');
+
+    function updateDisplay() {
+      mainDisplay.textContent = currentInput;
+      if (operation && previousInput) {
+        const opSymbol = operation === '*' ? '×' : (operation === '/' ? '÷' : operation);
+        historyDisplay.textContent = previousInput + ' ' + opSymbol;
+      } else {
+        historyDisplay.textContent = '';
+      }
+    }
+
+    function appendNum(num) {
+      if (currentInput === '0' || resetOnNextInput) {
+        currentInput = num;
+        resetOnNextInput = false;
+      } else {
+        if (currentInput.length < 14) currentInput += num;
+      }
+      updateDisplay();
+    }
+
+    function appendDot() {
+      if (resetOnNextInput) {
+        currentInput = '0.';
+        resetOnNextInput = false;
+      } else if (!currentInput.includes('.')) {
+        currentInput += '.';
+      }
+      updateDisplay();
+    }
+
+    function appendOp(op) {
+      if (operation && !resetOnNextInput) {
+        calculate();
+      }
+      previousInput = currentInput;
+      operation = op;
+      resetOnNextInput = true;
+      updateDisplay();
+    }
+
+    function calculate() {
+      if (!operation || !previousInput) return;
+      const prev = parseFloat(previousInput);
+      const curr = parseFloat(currentInput);
+      let result = 0;
+
+      switch (operation) {
+        case '+': result = prev + curr; break;
+        case '-': result = prev - curr; break;
+        case '*': result = prev * curr; break;
+        case '/':
+          if (curr === 0) {
+            currentInput = 'Error';
+            operation = null;
+            previousInput = '';
+            resetOnNextInput = true;
+            updateDisplay();
+            return;
+          }
+          result = prev / curr;
+          break;
+        case '^': result = Math.pow(prev, curr); break;
+      }
+
+      result = Math.round(result * 1e10) / 1e10;
+      historyDisplay.textContent = previousInput + ' ' + (operation === '*' ? '×' : (operation === '/' ? '÷' : operation)) + ' ' + currentInput + ' =';
+      currentInput = String(result);
+      operation = null;
+      previousInput = '';
+      resetOnNextInput = true;
+      mainDisplay.textContent = currentInput;
+    }
+
+    function execFunc(fn) {
+      const val = parseFloat(currentInput);
+      let res = 0;
+      switch (fn) {
+        case 'sin': res = Math.sin(val); break;
+        case 'cos': res = Math.cos(val); break;
+        case 'tan': res = Math.tan(val); break;
+        case 'sqrt':
+          if (val < 0) { currentInput = 'Error'; updateDisplay(); return; }
+          res = Math.sqrt(val);
+          break;
+        case 'pi': res = Math.PI; break;
+        case 'pow':
+          appendOp('^');
+          return;
+      }
+      res = Math.round(res * 1e10) / 1e10;
+      currentInput = String(res);
+      resetOnNextInput = true;
+      updateDisplay();
+    }
+
+    function clearAll() {
+      currentInput = '0';
+      previousInput = '';
+      operation = null;
+      resetOnNextInput = false;
+      updateDisplay();
+    }
+
+    function backspace() {
+      if (resetOnNextInput || currentInput === 'Error') {
+        clearAll();
+        return;
+      }
+      if (currentInput.length > 1) {
+        currentInput = currentInput.slice(0, -1);
+      } else {
+        currentInput = '0';
+      }
+      updateDisplay();
+    }
+
+    function memoryClear() { memory = 0; }
+    function memoryRecall() { currentInput = String(memory); resetOnNextInput = true; updateDisplay(); }
+    function memoryStore() { memory = parseFloat(currentInput) || 0; }
+    function memoryAdd() { memory += parseFloat(currentInput) || 0; }
+    function memorySubtract() { memory -= parseFloat(currentInput) || 0; }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key >= '0' && e.key <= '9') appendNum(e.key);
+      else if (e.key === '.') appendDot();
+      else if (e.key === '+') appendOp('+');
+      else if (e.key === '-') appendOp('-');
+      else if (e.key === '*') appendOp('*');
+      else if (e.key === '/') { e.preventDefault(); appendOp('/'); }
+      else if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); calculate(); }
+      else if (e.key === 'Backspace') backspace();
+      else if (e.key === 'Escape') clearAll();
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>`;
+
+  const coreJs = {
+    path: 'src/calculator.js',
+    content: `// Pure arithmetic and scientific calculation engine
+export function add(a, b) { return Number(a) + Number(b); }
+export function subtract(a, b) { return Number(a) - Number(b); }
+export function multiply(a, b) { return Number(a) * Number(b); }
+export function divide(a, b) {
+  if (Number(b) === 0) throw new Error("Division by zero");
+  return Number(a) / Number(b);
+}
+export function power(a, b) { return Math.pow(Number(a), Number(b)); }
+export function sqrt(a) {
+  const num = Number(a);
+  if (num < 0) throw new Error("Negative square root");
+  return Math.sqrt(num);
+}
+export const PI = Math.PI;
+
+export function evaluateExpression(a, op, b) {
+  if (op === '+') return add(a, b);
+  if (op === '-') return subtract(a, b);
+  if (op === '*' || op === '×') return multiply(a, b);
+  if (op === '/') return divide(a, b);
+  if (op === '^' || op === 'pow') return power(a, b);
+  throw new Error("Unsupported operator");
+}
+`
+  };
+
+  const testJs = {
+    path: 'tests/calculator.test.js',
+    content: `import { describe, it } from 'node:test';
+import assert from 'node:assert';
+import { add, subtract, multiply, divide, power, sqrt, PI, evaluateExpression } from '../src/calculator.js';
+
+describe('Calculator Core & Scientific Operations', () => {
+  it('should perform correct addition', () => {
+    assert.strictEqual(add(15, 27), 42);
+    assert.strictEqual(add(-5, 10), 5);
+  });
+
+  it('should perform correct subtraction', () => {
+    assert.strictEqual(subtract(100, 37), 63);
+  });
+
+  it('should perform correct multiplication', () => {
+    assert.strictEqual(multiply(7, 8), 56);
+  });
+
+  it('should perform correct division and guard zero division', () => {
+    assert.strictEqual(divide(100, 4), 25);
+    assert.throws(() => divide(10, 0), /Division by zero/);
+  });
+
+  it('should perform scientific exponentiation', () => {
+    assert.strictEqual(power(2, 3), 8);
+    assert.strictEqual(power(10, 2), 100);
+  });
+
+  it('should perform scientific square root and guard negative roots', () => {
+    assert.strictEqual(sqrt(64), 8);
+    assert.strictEqual(sqrt(0), 0);
+    assert.throws(() => sqrt(-9), /Negative square root/);
+  });
+
+  it('should provide accurate Pi constant', () => {
+    assert(Math.abs(PI - 3.1415926535) < 0.0001);
+  });
+
+  it('should evaluate full binary expression correctly including power', () => {
+    assert.strictEqual(evaluateExpression(12, '*', 4), 48);
+    assert.strictEqual(evaluateExpression(50, '/', 2), 25);
+    assert.strictEqual(evaluateExpression(3, '^', 3), 27);
+  });
+});
+`
+  };
+
+  const tasks = [
+    { code: 'TASK-001', title: 'Arithmetic Engine & Math Precision Module', description: 'Implement core arithmetic, scientific operations, and error boundaries.', agent: 'PLANNER' as const, category: 'ARCHITECTURE' as const, dependencies: [], targetFile: 'src/calculator.js' },
+    { code: 'TASK-002', title: 'Interactive Scientific Calculator UI (index.html)', description: 'Build responsive calculator with memory toolbar, history tape, and keyboard bindings.', agent: 'DEVELOPER' as const, category: 'FRONTEND' as const, dependencies: ['TASK-001'], targetFile: 'index.html' },
+    { code: 'TASK-003', title: 'Automated Arithmetic Test Suite', description: 'Node.js tests verifying floating-point precision, operations, and zero-division guards.', agent: 'TESTER' as const, category: 'TESTING' as const, dependencies: ['TASK-001'], targetFile: 'tests/calculator.test.js' },
+    { code: 'TASK-004', title: 'Zero-Trust Boundary & Security Verification', description: 'Ensure numerical validation, overflow protection, and input sanitization.', agent: 'FINAL_EVALUATOR' as const, category: 'VERIFICATION' as const, dependencies: ['TASK-002', 'TASK-003'], targetFile: 'src/calculator.js' }
+  ];
+
+  return { domain: 'CALCULATOR', title, description, requirements, html, coreJs, testJs, tasks };
+}
+
+// Helper to extract domain-tailored schema and mock entities for any prompt
+function extractDomainConfig(prompt: string) {
+  const p = prompt.toLowerCase();
+  
+  if (p.includes('patient') || p.includes('clinic') || p.includes('hospital') || p.includes('medical') || p.includes('doctor')) {
+    return {
+      entity: 'Patient',
+      entityPlural: 'Patients',
+      metricLabel: 'Critical / Urgent',
+      metricUnit: 'patients',
+      calcType: 'COUNT_MATCH',
+      field1: { label: 'Patient Full Name', placeholder: 'e.g. Eleanor Vance', type: 'text' },
+      field2: { label: 'Department / Ward', options: ['Emergency', 'Cardiology', 'General Medicine', 'Pediatrics', 'Orthopedics'] },
+      field3: { label: 'Age / Room No', placeholder: 'e.g. 102', type: 'number', prefix: 'Room ' },
+      field4: { label: 'Triage Status', options: ['ADMITTED', 'OBSERVATION', 'CRITICAL', 'DISCHARGED'] },
+      field5: { label: 'Medical Notes & Vitals', placeholder: 'Blood pressure, allergy warnings, triage notes...', type: 'textarea' },
+      sampleItems: [
+        { id: '1', title: 'Eleanor Vance', category: 'Emergency', value: '102', status: 'CRITICAL', notes: 'Severe allergic reaction, vitals stabilizing under epinephrine.', date: 'Today, 10:15 AM' },
+        { id: '2', title: 'Marcus Chen', category: 'Cardiology', value: '204', status: 'OBSERVATION', notes: 'Post-angiogram recovery, telemetry active.', date: 'Today, 08:30 AM' },
+        { id: '3', title: 'Sofia Al-Mansoor', category: 'Pediatrics', value: '310', status: 'DISCHARGED', notes: 'Full recovery from bronchitis, follow-up in 10 days.', date: 'Yesterday, 04:00 PM' }
+      ]
+    };
+  }
+
+  if (p.includes('inventory') || p.includes('stock') || p.includes('warehouse') || p.includes('product') || p.includes('asset')) {
+    return {
+      entity: 'Inventory Item',
+      entityPlural: 'Inventory Items',
+      metricLabel: 'Total Stock Valuation',
+      metricUnit: '$',
+      calcType: 'SUM_CURRENCY',
+      field1: { label: 'Product / Item Name', placeholder: 'e.g. Sony WH-1000XM5 Headphones', type: 'text' },
+      field2: { label: 'Category', options: ['Electronics', 'Furniture', 'Apparel', 'Hardware', 'Accessories'] },
+      field3: { label: 'Total Value ($)', placeholder: 'e.g. 1250', type: 'number', prefix: '$' },
+      field4: { label: 'Stock Status', options: ['IN_STOCK', 'LOW_STOCK', 'OUT_OF_STOCK', 'ON_ORDER'] },
+      field5: { label: 'SKU & Warehouse Bin', placeholder: 'SKU-8892, Bin Location: A-14, 45 units available.', type: 'textarea' },
+      sampleItems: [
+        { id: '1', title: 'Sony Pro Wireless Headphones', category: 'Electronics', value: '299', status: 'IN_STOCK', notes: 'SKU-WH-1000XM5, Bin: A-14, 45 units available.', date: 'Today, 11:00 AM' },
+        { id: '2', title: 'Ergonomic Mesh Office Chair', category: 'Furniture', value: '450', status: 'LOW_STOCK', notes: 'SKU-FURN-82, Bin: B-02, 3 units remaining.', date: 'Today, 09:20 AM' },
+        { id: '3', title: 'USB-C Fast Charging Hub (100W)', category: 'Electronics', value: '65', status: 'IN_STOCK', notes: 'SKU-PWR-100, Bin: C-09, 120 units available.', date: 'Yesterday, 02:45 PM' }
+      ]
+    };
+  }
+
+  if (p.includes('student') || p.includes('grade') || p.includes('school') || p.includes('attendance') || p.includes('course') || p.includes('class')) {
+    return {
+      entity: 'Student Record',
+      entityPlural: 'Student Records',
+      metricLabel: 'Average Score',
+      metricUnit: '%',
+      calcType: 'AVERAGE',
+      field1: { label: 'Student Full Name', placeholder: 'e.g. Alexander Hayes', type: 'text' },
+      field2: { label: 'Course / Subject', options: ['Computer Science', 'Mathematics', 'Physics', 'Literature', 'Chemistry'] },
+      field3: { label: 'Score / Attendance %', placeholder: 'e.g. 96', type: 'number', prefix: '%' },
+      field4: { label: 'Academic Standing', options: ['DISTINCTION', 'PASS', 'PROBATION', 'INCOMPLETE'] },
+      field5: { label: 'Instructor Feedback', placeholder: 'Exceptional test performance in linear algebra.', type: 'textarea' },
+      sampleItems: [
+        { id: '1', title: 'Alexander Hayes', category: 'Computer Science', value: '96', status: 'DISTINCTION', notes: 'Completed distributed systems project ahead of schedule.', date: 'Today, 10:00 AM' },
+        { id: '2', title: 'Maya Lin', category: 'Mathematics', value: '88', status: 'PASS', notes: 'Consistent attendance, strong problem set solutions.', date: 'Today, 09:15 AM' },
+        { id: '3', title: 'Jordan Rivera', category: 'Physics', value: '72', status: 'PASS', notes: 'Lab reports submitted, needs review on electromagnetic waves.', date: 'Yesterday, 03:30 PM' }
+      ]
+    };
+  }
+
+  if (p.includes('workout') || p.includes('fitness') || p.includes('gym') || p.includes('exercise') || p.includes('calorie')) {
+    return {
+      entity: 'Workout Session',
+      entityPlural: 'Workouts',
+      metricLabel: 'Total Calories Burned',
+      metricUnit: 'kcal',
+      calcType: 'SUM_NUMBER',
+      field1: { label: 'Exercise / Routine Name', placeholder: 'e.g. Barbell Bench Press', type: 'text' },
+      field2: { label: 'Muscle Group', options: ['Chest & Triceps', 'Back & Biceps', 'Legs & Calves', 'Shoulders', 'Cardio & HIIT'] },
+      field3: { label: 'Calories Burned (kcal)', placeholder: 'e.g. 420', type: 'number', prefix: 'kcal ' },
+      field4: { label: 'Session Intensity', options: ['HIGH_INTENSITY', 'MODERATE', 'COMPLETED', 'RECOVERY'] },
+      field5: { label: 'Sets, Reps & Weight', placeholder: '4 sets x 8 reps @ 205 lbs; 3 sets dips.', type: 'textarea' },
+      sampleItems: [
+        { id: '1', title: 'Heavy Incline Bench & Dips', category: 'Chest & Triceps', value: '420', status: 'HIGH_INTENSITY', notes: '4 sets x 8 reps @ 205 lbs; 3 sets bodyweight dips to failure.', date: 'Today, 07:30 AM' },
+        { id: '2', title: 'Deadlifts & Barbell Rows', category: 'Back & Biceps', value: '530', status: 'COMPLETED', notes: '5 sets x 5 reps @ 315 lbs; strict form on pull-ups.', date: 'Yesterday, 06:45 PM' },
+        { id: '3', title: '5K Interval Treadmill Sprint', category: 'Cardio & HIIT', value: '380', status: 'HIGH_INTENSITY', notes: 'Interval sprints 14 km/h with 1 min active recovery jogs.', date: '2 days ago' }
+      ]
+    };
+  }
+
+  if (p.includes('crm') || p.includes('lead') || p.includes('client') || p.includes('deal') || p.includes('sales')) {
+    return {
+      entity: 'Sales Deal',
+      entityPlural: 'Sales Deals',
+      metricLabel: 'Total Pipeline Value',
+      metricUnit: '$',
+      calcType: 'SUM_CURRENCY',
+      field1: { label: 'Account / Deal Name', placeholder: 'e.g. Apex Global Logistics Cloud', type: 'text' },
+      field2: { label: 'Account Tier', options: ['Enterprise', 'Mid-Market', 'Startup', 'Government', 'SMB'] },
+      field3: { label: 'Contract Value ($)', placeholder: 'e.g. 120000', type: 'number', prefix: '$' },
+      field4: { label: 'Pipeline Stage', options: ['DISCOVERY', 'PROPOSAL_SENT', 'NEGOTIATION', 'CLOSED_WON'] },
+      field5: { label: 'Decision Maker & Next Steps', placeholder: 'Security audit passed; reviewing MSA terms with procurement.', type: 'textarea' },
+      sampleItems: [
+        { id: '1', title: 'Apex Global Logistics Cloud Migration', category: 'Enterprise', value: '120000', status: 'NEGOTIATION', notes: 'Security audit passed; reviewing MSA terms with procurement.', date: 'Today, 11:30 AM' },
+        { id: '2', title: 'FinFlow API Integration License', category: 'Mid-Market', value: '36000', status: 'PROPOSAL_SENT', notes: 'Demo completed with positive feedback from engineering team.', date: 'Yesterday, 03:15 PM' },
+        { id: '3', title: 'HyperScale AI Dev Platform', category: 'Startup', value: '24000', status: 'CLOSED_WON', notes: 'Annual contract executed, onboarding kickoff scheduled.', date: '2 days ago' }
+      ]
+    };
+  }
+
+  // Dynamic entity inference for any custom prompt
+  const cleanTitle = prompt.trim().split(/\s+/).slice(0, 4).join(' ');
+  const entityName = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
+
+  return {
+    entity: entityName + ' Entry',
+    entityPlural: entityName + ' Entries',
+    metricLabel: 'Total Value / Score',
+    metricUnit: 'pts',
+    calcType: 'SUM_NUMBER',
+    field1: { label: 'Item Name / Title', placeholder: 'e.g. Core Implementation Phase A', type: 'text' },
+    field2: { label: 'Category / Tag', options: ['Operations', 'Development', 'Planning', 'Quality Assurance', 'Management'] },
+    field3: { label: 'Metric Value', placeholder: 'e.g. 150', type: 'number', prefix: '#' },
+    field4: { label: 'Execution State', options: ['ACTIVE', 'IN_PROGRESS', 'COMPLETED', 'PENDING'] },
+    field5: { label: 'Details & Parameters', placeholder: 'Enter record parameters and observations...', type: 'textarea' },
+    sampleItems: [
+      { id: '1', title: 'Core Implementation Phase A', category: 'Development', value: '150', status: 'ACTIVE', notes: 'Primary functional logic initialized and verified against specifications.', date: 'Today, 10:00 AM' },
+      { id: '2', title: 'Integration Test Suite & Audit', category: 'Quality Assurance', value: '95', status: 'COMPLETED', notes: 'Automated test suite passed 100% assertions without regressions.', date: 'Yesterday, 04:30 PM' },
+      { id: '3', title: 'Operational Readiness Review', category: 'Operations', value: '80', status: 'IN_PROGRESS', notes: 'Telemetry monitoring and live responsive event bindings active.', date: 'Yesterday, 02:00 PM' }
+    ]
+  };
+}
+
+// 5. UNIVERSAL APPLICATION GENERATOR (100% Fully Functional Domain-Aware Engine)
+function generateUniversalBundle(prompt: string): DomainBundle {
+  const cleanPrompt = prompt.trim();
+  const words = cleanPrompt.split(/\s+/).slice(0, 5).join(' ');
+  const appName = words.charAt(0).toUpperCase() + words.slice(1);
+  const cfg = extractDomainConfig(prompt);
+  const title = appName;
+  const description = `Interactive production web application implementing: ${cleanPrompt.slice(0, 90)}`;
+  const requirements = [
+    `Complete domain architecture tailored for: ${cleanPrompt.slice(0, 60)}`,
+    'Interactive dashboard with multi-field forms, real-time calculations, and search filters',
+    'Local persistence, statistics calculations, and direct CSV file export',
+    'Node.js unit test coverage verifying business logic'
+  ];
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>${appName}</title>
   <style>
     :root {
       --bg: #090d16;
       --card-bg: #111827;
       --border: rgba(255,255,255,0.08);
-      --primary: #ef4444;
-      --accent: #06b6d4;
+      --primary: #3b82f6;
+      --accent: #10b981;
       --text: #f3f4f6;
       --text-muted: #9ca3af;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 16px; display: flex; flex-direction: column; align-items: center; }
-    .container { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 20px; }
+    .container { width: 100%; max-width: 960px; display: flex; flex-direction: column; gap: 18px; }
     
-    header { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+    header { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 18px 22px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; }
     h1 { font-size: 20px; font-weight: 800; color: #fff; }
     .desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
     
-    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
-    .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
-    .stat-label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+    .stat-label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; }
     .stat-val { font-size: 24px; font-weight: 800; color: #fff; font-family: monospace; }
     
     .content-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-    .form-row { display: flex; flex-wrap: wrap; gap: 10px; }
-    input[type="text"] { flex: 1; min-width: 200px; background: #0c121e; border: 1px solid var(--border); color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 13px; outline: none; }
-    input[type="text"]:focus { border-color: var(--primary); }
-    
-    .btn { background: var(--primary); color: #fff; border: none; border-radius: 10px; padding: 12px 20px; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+    .input-label { font-size: 11px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; }
+    input, select, textarea { background: #0c121e; border: 1px solid var(--border); color: #fff; padding: 10px 14px; border-radius: 10px; font-size: 13px; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+    textarea { resize: vertical; min-height: 48px; grid-column: 1 / -1; }
+
+    .btn { background: var(--primary); color: #fff; border: none; border-radius: 10px; padding: 11px 20px; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
     .btn:hover { opacity: 0.9; }
-    
-    .items-list { display: flex; flex-direction: column; gap: 10px; max-height: 480px; overflow-y: auto; }
-    .item-row { background: #0c121e; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-    .item-text { font-size: 13px; color: #fff; font-weight: 500; }
-    .item-meta { font-size: 11px; color: var(--text-muted); }
-    .item-actions { display: flex; gap: 6px; }
-    .action-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #cbd5e1; padding: 4px 8px; border-radius: 6px; font-size: 11px; cursor: pointer; }
-    .action-btn:hover { background: var(--primary); color: #fff; }
+    .btn-secondary { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #cbd5e1; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+    .controls-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; }
+    .search-box { flex: 1; min-width: 220px; }
+    .filter-tabs { display: flex; gap: 6px; }
+    .tab-btn { background: #0c121e; border: 1px solid var(--border); color: var(--text-muted); padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .items-list { display: flex; flex-direction: column; gap: 10px; }
+    .item-card { background: #0c121e; border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; }
+    .item-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .item-title { font-size: 15px; font-weight: 700; color: #fff; }
+    .item-badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
+    .badge-active { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+    .badge-success { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-warning { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+    .badge-danger { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+    .item-meta-row { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--text-muted); }
+    .item-notes { font-size: 13px; color: #cbd5e1; background: rgba(255,255,255,0.02); border-left: 3px solid var(--primary); padding: 8px 12px; border-radius: 4px; }
+    .item-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .action-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .action-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .action-btn.btn-del:hover { background: rgba(239,68,68,0.2); color: #f87171; border-color: rgba(239,68,68,0.4); }
   </style>
 </head>
 <body>
@@ -1475,42 +2035,85 @@ function generateUniversalBundle(prompt: string): DomainBundle {
         <h1>${appName}</h1>
         <div class="desc">${cleanPrompt}</div>
       </div>
-      <div style="font-family: monospace; font-size: 11px; color: #34d399; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 4px 10px; border-radius: 8px;">
-        STATUS: ONLINE
+      <div class="header-actions">
+        <button class="btn btn-secondary" onclick="exportCsv()">Export CSV</button>
+        <div style="font-family: monospace; font-size: 11px; color: #34d399; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 6px 12px; border-radius: 8px;">
+          SYSTEM: ONLINE
+        </div>
       </div>
     </header>
 
     <div class="stats-row">
       <div class="stat-card">
-        <div class="stat-label">Active Items</div>
-        <div class="stat-val" id="statCount">0</div>
+        <div class="stat-label">Total ${cfg.entityPlural}</div>
+        <div class="stat-val" id="statTotal">0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Completed</div>
+        <div class="stat-label">Active / Pending</div>
+        <div class="stat-val" id="statActive" style="color: #60a5fa;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Completed / Resolved</div>
         <div class="stat-val" id="statCompleted" style="color: #34d399;">0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">System Velocity</div>
-        <div class="stat-val" id="statVelocity" style="color: #38bdf8;">100%</div>
+        <div class="stat-label">${cfg.metricLabel}</div>
+        <div class="stat-val" id="statMetric" style="color: #fbbf24;">0</div>
       </div>
     </div>
 
     <div class="content-card">
+      <h3 style="font-size: 14px; font-weight: 700; color: #fff;">Register New ${cfg.entity}</h3>
       <form onsubmit="handleAddItem(event)">
-        <div class="form-row">
-          <input type="text" id="itemInput" placeholder="Add entry for: ${cleanPrompt.slice(0, 40)}..." required />
-          <button type="submit" class="btn">Add Entry</button>
+        <div class="form-grid">
+          <div class="input-group">
+            <label class="input-label">${cfg.field1.label}</label>
+            <input type="text" id="fTitle" placeholder="${cfg.field1.placeholder}" required />
+          </div>
+          <div class="input-group">
+            <label class="input-label">${cfg.field2.label}</label>
+            <select id="fCategory">
+              ${cfg.field2.options.map(o => `<option value="${o}">${o}</option>`).join('')}
+            </select>
+          </div>
+          <div class="input-group">
+            <label class="input-label">${cfg.field3.label}</label>
+            <input type="number" id="fValue" placeholder="${cfg.field3.placeholder}" required />
+          </div>
+          <div class="input-group">
+            <label class="input-label">${cfg.field4.label}</label>
+            <select id="fStatus">
+              ${cfg.field4.options.map(o => `<option value="${o}">${o.replace('_', ' ')}</option>`).join('')}
+            </select>
+          </div>
+          <div class="input-group" style="grid-column: 1 / -1;">
+            <label class="input-label">${cfg.field5.label}</label>
+            <textarea id="fNotes" placeholder="${cfg.field5.placeholder}"></textarea>
+          </div>
+        </div>
+        <div style="margin-top: 14px; display: flex; justify-content: flex-end;">
+          <button type="submit" class="btn">+ Add ${cfg.entity}</button>
         </div>
       </form>
+    </div>
 
-      <div class="items-list" id="itemsList">
-        <!-- Dynamically populated -->
+    <div class="content-card">
+      <div class="controls-row">
+        <input type="text" id="searchInput" class="search-box" placeholder="Search ${cfg.entityPlural} by title or category..." oninput="render()" />
+        <div class="filter-tabs">
+          <button class="tab-btn active" onclick="setFilter('ALL')">All</button>
+          <button class="tab-btn" onclick="setFilter('ACTIVE')">Active</button>
+          <button class="tab-btn" onclick="setFilter('RESOLVED')">Completed</button>
+        </div>
       </div>
+
+      <div class="items-list" id="itemsList"></div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'autoloop_app_items_' + encodeURIComponent('${appName.toLowerCase().replace(/\\s+/g, '_')}');
+    const STORAGE_KEY = 'autoloop_universal_' + encodeURIComponent('${appName.toLowerCase().replace(/\\s+/g, '_')}');
+    let currentFilter = 'ALL';
 
     function getItems() {
       try {
@@ -1528,72 +2131,159 @@ function generateUniversalBundle(prompt: string): DomainBundle {
 
     function handleAddItem(e) {
       e.preventDefault();
-      const input = document.getElementById('itemInput');
-      const val = input.value.trim();
-      if (!val) return;
+      const title = document.getElementById('fTitle').value.trim();
+      const category = document.getElementById('fCategory').value;
+      const value = document.getElementById('fValue').value.trim();
+      const status = document.getElementById('fStatus').value;
+      const notes = document.getElementById('fNotes').value.trim();
+
+      if (!title || !value) return;
 
       const items = getItems();
       items.unshift({
-        id: 'item_' + Date.now(),
-        text: val,
-        completed: false,
-        created: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        id: 'rec_' + Date.now(),
+        title,
+        category,
+        value,
+        status,
+        notes,
+        date: 'Today, ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
 
       saveItems(items);
-      input.value = '';
+      document.getElementById('fTitle').value = '';
+      document.getElementById('fValue').value = '';
+      document.getElementById('fNotes').value = '';
     }
 
-    function toggleItem(id) {
+    function toggleStatus(id) {
       const items = getItems();
       const item = items.find(i => i.id === id);
       if (item) {
-        item.completed = !item.completed;
+        const isFinished = item.status === 'COMPLETED' || item.status === 'CLOSED_WON' || item.status === 'DISCHARGED' || item.status === 'DISTINCTION';
+        item.status = isFinished ? '${cfg.field4.options[0]}' : '${cfg.field4.options[cfg.field4.options.length - 1]}';
         saveItems(items);
       }
     }
 
     function deleteItem(id) {
-      const items = getItems().filter(i => i.id !== id);
-      saveItems(items);
+      if (confirm('Delete this record?')) {
+        const items = getItems().filter(i => i.id !== id);
+        saveItems(items);
+      }
+    }
+
+    function setFilter(f) {
+      currentFilter = f;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      render();
+    }
+
+    function exportCsv() {
+      const items = getItems();
+      if (!items.length) { alert('No records to export'); return; }
+      const headers = ['ID', 'Title', 'Category', 'Value', 'Status', 'Notes', 'Date'];
+      const rows = items.map(i => [
+        i.id,
+        '"' + (i.title || '').replace(/"/g, '""') + '"',
+        '"' + (i.category || '').replace(/"/g, '""') + '"',
+        i.value,
+        i.status,
+        '"' + (i.notes || '').replace(/"/g, '""') + '"',
+        i.date
+      ]);
+      const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', '${appName.toLowerCase().replace(/\\s+/g, '_')}_export.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     function render() {
       const items = getItems();
       const list = document.getElementById('itemsList');
+      const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
+
+      // Metrics calculation
       const total = items.length;
-      const completed = items.filter(i => i.completed).length;
+      const completed = items.filter(i => i.status === 'COMPLETED' || i.status === 'CLOSED_WON' || i.status === 'DISCHARGED' || i.status === 'DISTINCTION').length;
+      const active = total - completed;
+      
+      let metricDisplay = '0';
+      const calcType = '${cfg.calcType}';
+      if (calcType === 'SUM_CURRENCY') {
+        const sum = items.reduce((acc, i) => acc + (parseFloat(i.value) || 0), 0);
+        metricDisplay = '$' + sum.toLocaleString();
+      } else if (calcType === 'AVERAGE') {
+        const avg = total > 0 ? (items.reduce((acc, i) => acc + (parseFloat(i.value) || 0), 0) / total).toFixed(1) : '0';
+        metricDisplay = avg + '%';
+      } else {
+        const sum = items.reduce((acc, i) => acc + (parseFloat(i.value) || 0), 0);
+        metricDisplay = sum.toLocaleString() + ' ${cfg.metricUnit}';
+      }
 
-      document.getElementById('statCount').textContent = total;
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statActive').textContent = active;
       document.getElementById('statCompleted').textContent = completed;
+      document.getElementById('statMetric').textContent = metricDisplay;
 
-      if (items.length === 0) {
-        list.innerHTML = '<div style="text-align:center; padding:30px; color:#64748b; font-size:12px;">No entries yet. Enter a task or item above.</div>';
+      let filtered = items;
+      if (currentFilter === 'ACTIVE') {
+        filtered = filtered.filter(i => !(i.status === 'COMPLETED' || i.status === 'CLOSED_WON' || i.status === 'DISCHARGED' || i.status === 'DISTINCTION'));
+      } else if (currentFilter === 'RESOLVED') {
+        filtered = filtered.filter(i => (i.status === 'COMPLETED' || i.status === 'CLOSED_WON' || i.status === 'DISCHARGED' || i.status === 'DISTINCTION'));
+      }
+
+      if (query) {
+        filtered = filtered.filter(i => 
+          (i.title || '').toLowerCase().includes(query) || 
+          (i.category || '').toLowerCase().includes(query) ||
+          (i.notes || '').toLowerCase().includes(query)
+        );
+      }
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div style="text-align:center; padding:32px; color:#64748b; font-size:13px;">No matching records found. Register an entry above.</div>';
         return;
       }
 
-      list.innerHTML = items.map(item => \`
-        <div class="item-row">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <input type="checkbox" \${item.completed ? 'checked' : ''} onchange="toggleItem('\${item.id}')" style="cursor: pointer; width: 16px; height: 16px; accent-color: #ef4444;" />
-            <div>
-              <div class="item-text" style="\${item.completed ? 'text-decoration: line-through; color: #64748b;' : ''}">\${item.text}</div>
-              <div class="item-meta">Created at \${item.created}</div>
+      list.innerHTML = filtered.map(item => {
+        let badgeClass = 'badge-active';
+        if (item.status === 'COMPLETED' || item.status === 'CLOSED_WON' || item.status === 'DISCHARGED' || item.status === 'DISTINCTION') badgeClass = 'badge-success';
+        else if (item.status === 'CRITICAL' || item.status === 'OUT_OF_STOCK' || item.status === 'PROBATION') badgeClass = 'badge-danger';
+        else if (item.status === 'LOW_STOCK' || item.status === 'OBSERVATION' || item.status === 'NEGOTIATION') badgeClass = 'badge-warning';
+
+        return \`
+          <div class="item-card">
+            <div class="item-header">
+              <div>
+                <div class="item-title">\${item.title}</div>
+                <div class="item-meta-row" style="margin-top: 4px;">
+                  <span>Category: <strong>\${item.category}</strong></span>
+                  <span>Metric: <strong>\${item.value}</strong></span>
+                  <span>Logged: \${item.date}</span>
+                </div>
+              </div>
+              <span class="item-badge \${badgeClass}">\${(item.status || '').replace('_', ' ')}</span>
+            </div>
+            \${item.notes ? \`<div class="item-notes">\${item.notes}</div>\` : ''}
+            <div class="item-actions">
+              <button class="action-btn" onclick="toggleStatus('\${item.id}')">Toggle Status</button>
+              <button class="action-btn btn-del" onclick="deleteItem('\${item.id}')">Delete</button>
             </div>
           </div>
-          <div class="item-actions">
-            <button class="action-btn" onclick="deleteItem('\${item.id}')">Delete</button>
-          </div>
-        </div>
-      \`).join('');
+        \`;
+      }).join('');
     }
 
-    // Seed defaults if brand new
+    // Seed defaults if fresh
     if (getItems().length === 0) {
-      saveItems([
-        { id: 'item_1', text: 'Initialize system parameters for ${appName}', completed: true, created: '09:00 AM' },
-        { id: 'item_2', text: 'Configure primary workflow and verification bounds', completed: false, created: '09:15 AM' }
-      ]);
+      saveItems(${JSON.stringify(cfg.sampleItems)});
     } else {
       render();
     }
@@ -1603,22 +2293,51 @@ function generateUniversalBundle(prompt: string): DomainBundle {
 
   const coreJs = {
     path: 'src/core.js',
-    content: `// Universal state management and processing routines
-export function processItem(text) {
-  if (!text || typeof text !== 'string') {
-    throw new Error('Invalid item text');
+    content: `// Universal state management and calculation engine
+export function createRecord(title, category, value, status, notes = '') {
+  if (!title || typeof title !== 'string' || !title.trim()) {
+    throw new Error('Title is required');
+  }
+  const numVal = Number(value);
+  if (isNaN(numVal)) {
+    throw new Error('Numeric value is required');
   }
   return {
-    id: 'item_' + Date.now(),
-    text: text.trim(),
-    completed: false,
+    id: 'rec_' + Date.now(),
+    title: title.trim(),
+    category: category || 'General',
+    value: numVal,
+    status: status || 'ACTIVE',
+    notes: String(notes).trim(),
     timestamp: new Date().toISOString()
   };
 }
 
-export function filterItems(items, showCompleted) {
-  if (!Array.isArray(items)) return [];
-  return items.filter(i => showCompleted ? true : !i.completed);
+export function filterRecords(records, filterType, query = '') {
+  if (!Array.isArray(records)) return [];
+  let res = records;
+  if (filterType === 'ACTIVE') {
+    res = res.filter(r => r.status !== 'COMPLETED' && r.status !== 'CLOSED_WON' && r.status !== 'DISCHARGED');
+  } else if (filterType === 'RESOLVED') {
+    res = res.filter(r => r.status === 'COMPLETED' || r.status === 'CLOSED_WON' || r.status === 'DISCHARGED');
+  }
+  if (query) {
+    const q = query.toLowerCase();
+    res = res.filter(r => (r.title && r.title.toLowerCase().includes(q)) || (r.category && r.category.toLowerCase().includes(q)));
+  }
+  return res;
+}
+
+export function calculateAggregates(records) {
+  if (!Array.isArray(records) || records.length === 0) {
+    return { total: 0, sum: 0, average: 0, activeCount: 0, completedCount: 0 };
+  }
+  const total = records.length;
+  const sum = records.reduce((acc, r) => acc + (Number(r.value) || 0), 0);
+  const average = total > 0 ? sum / total : 0;
+  const completedCount = records.filter(r => r.status === 'COMPLETED' || r.status === 'CLOSED_WON' || r.status === 'DISCHARGED').length;
+  const activeCount = total - completedCount;
+  return { total, sum, average, activeCount, completedCount };
 }
 `
   };
@@ -1627,28 +2346,52 @@ export function filterItems(items, showCompleted) {
     path: 'tests/core.test.js',
     content: `import test from 'node:test';
 import assert from 'node:assert';
-import { processItem, filterItems } from '../src/core.js';
+import { createRecord, filterRecords, calculateAggregates } from '../src/core.js';
 
-test('Universal domain: item creation', () => {
-  const item = processItem('System Requirement A');
-  assert.strictEqual(item.text, 'System Requirement A');
-  assert.strictEqual(item.completed, false);
-  assert.ok(item.id);
+test('Core Domain: Record creation & validation', () => {
+  const rec = createRecord('Alpha Project', 'Development', 150, 'ACTIVE', 'Initial telemetry');
+  assert.strictEqual(rec.title, 'Alpha Project');
+  assert.strictEqual(rec.category, 'Development');
+  assert.strictEqual(rec.value, 150);
+  assert.strictEqual(rec.status, 'ACTIVE');
+  assert.ok(rec.id.startsWith('rec_'));
 
-  assert.throws(() => processItem(''), /Invalid item text/);
+  assert.throws(() => createRecord('', 'Dev', 100), /Title is required/);
+  assert.throws(() => createRecord('Item', 'Dev', 'not-a-number'), /Numeric value is required/);
 });
 
-test('Universal domain: item filtering', () => {
-  const items = [
-    { id: '1', text: 'A', completed: false },
-    { id: '2', text: 'B', completed: true }
+test('Core Domain: Filtering functionality', () => {
+  const dataset = [
+    { id: '1', title: 'Task A', category: 'Dev', value: 10, status: 'ACTIVE' },
+    { id: '2', title: 'Task B', category: 'Ops', value: 20, status: 'COMPLETED' },
+    { id: '3', title: 'Task C', category: 'Dev', value: 30, status: 'ACTIVE' }
   ];
-  const pending = filterItems(items, false);
-  assert.strictEqual(pending.length, 1);
-  assert.strictEqual(pending[0].id, '1');
 
-  const all = filterItems(items, true);
-  assert.strictEqual(all.length, 2);
+  const active = filterRecords(dataset, 'ACTIVE');
+  assert.strictEqual(active.length, 2);
+
+  const resolved = filterRecords(dataset, 'RESOLVED');
+  assert.strictEqual(resolved.length, 1);
+  assert.strictEqual(resolved[0].id, '2');
+
+  const queried = filterRecords(dataset, 'ALL', 'Ops');
+  assert.strictEqual(queried.length, 1);
+  assert.strictEqual(queried[0].id, '2');
+});
+
+test('Core Domain: Aggregation calculations', () => {
+  const dataset = [
+    { id: '1', value: 100, status: 'ACTIVE' },
+    { id: '2', value: 200, status: 'COMPLETED' },
+    { id: '3', value: 300, status: 'ACTIVE' }
+  ];
+
+  const stats = calculateAggregates(dataset);
+  assert.strictEqual(stats.total, 3);
+  assert.strictEqual(stats.sum, 600);
+  assert.strictEqual(stats.average, 200);
+  assert.strictEqual(stats.activeCount, 2);
+  assert.strictEqual(stats.completedCount, 1);
 });
 `
   };
@@ -1706,28 +2449,9 @@ export function synthesizeDomainBundle(prompt: string): DomainBundle {
     case 'EXPENSE':
       return generateExpenseBundle(prompt);
     case 'CALCULATOR':
-      // The calculator is also implemented in workspace.ts; let's provide a unified bundle
-      return {
-        domain: 'CALCULATOR',
-        title: 'Precision Scientific Calculator & Grapher',
-        description: 'Scientific arithmetic calculation engine with memory registers, history tape, and function plotting.',
-        requirements: [
-          'High-precision basic arithmetic (addition, subtraction, multiplication, division)',
-          'Scientific functions: square root, exponentiation, factorial, trigonometry, and constants (π, e)',
-          'Memory registers (MC, MR, MS, M+) and interactive history tape with recall',
-          'Keyboard event navigation and comprehensive unit test coverage'
-        ],
-        html: '', // Handled by calc generator in workspace.ts
-        coreJs: { path: 'src/calculator.js', content: '' },
-        testJs: { path: 'tests/calculator.test.js', content: '' },
-        tasks: [
-          { code: 'TASK-001', title: 'Arithmetic Engine & Math Precision Module', description: 'Implement core arithmetic, scientific operations, and error boundaries.', agent: 'PLANNER', category: 'ARCHITECTURE', dependencies: [], targetFile: 'src/calculator.js' },
-          { code: 'TASK-002', title: 'Interactive Scientific Calculator UI (index.html)', description: 'Build responsive calculator with memory toolbar, history tape, and keyboard bindings.', agent: 'DEVELOPER', category: 'FRONTEND', dependencies: ['TASK-001'], targetFile: 'index.html' },
-          { code: 'TASK-003', title: 'Automated Arithmetic Test Suite', description: 'Node.js tests verifying floating-point precision, operations, and zero-division guards.', agent: 'TESTER', category: 'TESTING', dependencies: ['TASK-001'], targetFile: 'tests/calculator.test.js' },
-          { code: 'TASK-004', title: 'Zero-Trust Boundary & Security Verification', description: 'Ensure numerical validation, overflow protection, and input sanitization.', agent: 'FINAL_EVALUATOR', category: 'VERIFICATION', dependencies: ['TASK-002', 'TASK-003'], targetFile: 'src/calculator.js' }
-        ]
-      };
+      return generateCalculatorBundle();
     default:
       return generateUniversalBundle(prompt);
   }
 }
+
