@@ -21,6 +21,17 @@ import { DefinitionOfDone } from './components/DefinitionOfDone';
 import { CompletionReportModal } from './components/CompletionReportModal';
 import { HumanInterventionModal } from './components/HumanInterventionModal';
 
+// Detect if running on a static hosting service without an Express backend (e.g. Cloudflare Workers, Pages, GitHub Pages)
+const isStaticDeploy = typeof window !== 'undefined' && (
+  window.location.hostname.includes('workers.dev') ||
+  window.location.hostname.includes('pages.dev') ||
+  window.location.hostname.includes('github.io') ||
+  window.location.hostname.includes('web.app') ||
+  window.location.hostname.includes('firebaseapp.com') ||
+  window.location.hostname.includes('netlify.app') ||
+  window.location.hostname.includes('vercel.app')
+);
+
 // Safe API JSON Fetcher helper that never crashes with Unexpected token '<'
 async function safeFetchJson<T = any>(url: string, options?: RequestInit): Promise<{ ok: boolean; data: T; error?: string }> {
   try {
@@ -60,7 +71,7 @@ export function App() {
   const [isStartingBuild, setIsStartingBuild] = useState<boolean>(false);
 
   const loopTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const isClientModeRef = useRef<boolean>(false);
+  const isClientModeRef = useRef<boolean>(isStaticDeploy);
 
   // Step runner loop
   const executeStep = async (projectId: string) => {
@@ -140,6 +151,22 @@ export function App() {
   const handleStartBuild = async (prompt: string, mode: AutonomyMode) => {
     setGlobalError(null);
     setIsStartingBuild(true);
+
+    // If deployed on Cloudflare Workers / static hosting or in client mode, initialize immediately
+    // without making a network call that Cloudflare's static edge would reject with HTTP 405
+    if (isClientModeRef.current || isStaticDeploy) {
+      isClientModeRef.current = true;
+      const clientProject = createClientProjectState(prompt, mode);
+      setProject(clientProject);
+      setActiveTab('workspace');
+      if (clientProject.files?.length > 0) {
+        setActiveFilePath(clientProject.files[0].path);
+      }
+      setIsRunning(true);
+      setIsStartingBuild(false);
+      return;
+    }
+
     try {
       const result = await safeFetchJson<any>('/api/projects', {
         method: 'POST',
@@ -157,7 +184,6 @@ export function App() {
         setIsRunning(result.data.project.status !== 'BLOCKED' && result.data.project.status !== 'COMPLETED');
       } else {
         // Backend returned 405 (Method Not Allowed / static CDN / shared preview) or 404/500
-        console.warn('Backend server returned non-OK or 405, starting in-browser Autonomous Engine:', result.error);
         isClientModeRef.current = true;
         const clientProject = createClientProjectState(prompt, mode);
         setProject(clientProject);
@@ -167,8 +193,7 @@ export function App() {
         }
         setIsRunning(true);
       }
-    } catch (err: any) {
-      console.warn('Connection failed, starting in-browser Autonomous Engine:', err);
+    } catch {
       isClientModeRef.current = true;
       const clientProject = createClientProjectState(prompt, mode);
       setProject(clientProject);
@@ -185,6 +210,10 @@ export function App() {
   const handlePause = async () => {
     if (!project) return;
     setIsRunning(false);
+    if (isClientModeRef.current) {
+      setProject(prev => prev ? { ...prev, status: 'PAUSED' } : prev);
+      return;
+    }
     const result = await safeFetchJson<any>(`/api/projects/${project.projectId}/pause`, { method: 'POST' });
     if (result.ok && result.data.project) setProject(result.data.project);
   };
@@ -192,6 +221,10 @@ export function App() {
   const handleResume = async () => {
     if (!project) return;
     setIsRunning(true);
+    if (isClientModeRef.current) {
+      setProject(prev => prev ? { ...prev, status: 'EXECUTING' } : prev);
+      return;
+    }
     const result = await safeFetchJson<any>(`/api/projects/${project.projectId}/resume`, { method: 'POST' });
     if (result.ok && result.data.project) setProject(result.data.project);
   };
@@ -199,6 +232,10 @@ export function App() {
   const handleAbort = async () => {
     if (!project) return;
     setIsRunning(false);
+    if (isClientModeRef.current) {
+      setProject(prev => prev ? { ...prev, status: 'ABORTED' } : prev);
+      return;
+    }
     const result = await safeFetchJson<any>(`/api/projects/${project.projectId}/abort`, { method: 'POST' });
     if (result.ok && result.data.project) setProject(result.data.project);
   };
@@ -237,6 +274,8 @@ export function App() {
       };
     });
 
+    if (isClientModeRef.current) return;
+
     const res = await safeFetchJson<any>(`/api/projects/${project.projectId}/feedback`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -253,6 +292,26 @@ export function App() {
     if (!project || project.status === 'COMPLETED' || project.status === 'ABORTED') return;
 
     const interval = setInterval(async () => {
+      if (isClientModeRef.current) {
+        const autoSnap: SystemStateSnapshot = {
+          id: 'snap_auto_' + Math.random().toString(36).substring(2, 9),
+          projectId: project.projectId,
+          name: `Auto-Checkpoint (${project.activeNode})`,
+          timestamp: new Date().toISOString(),
+          stage: project.activeNode,
+          completedTasks: project.metrics.completedTasks,
+          totalTasks: project.metrics.totalTasks,
+          filesCount: project.files.length,
+          tokensUsed: project.tokensUsed,
+          elapsedSeconds: project.elapsedSeconds,
+          summary: `Automatic snapshot at ${project.activeNode}`,
+          stateDumpJson: JSON.stringify(project),
+          isAutomatic: true
+        };
+        setProject(prev => prev ? { ...prev, restorePoints: [autoSnap, ...(prev.restorePoints || [])] } : prev);
+        return;
+      }
+
       try {
         const res = await safeFetchJson<any>(`/api/projects/${project.projectId}/snapshots`, {
           method: 'POST',
@@ -268,7 +327,7 @@ export function App() {
     }, 30000); // 30s interval
 
     return () => clearInterval(interval);
-  }, [project?.projectId, project?.status]);
+  }, [project?.projectId, project?.status, project?.activeNode]);
 
   // Snapshot handlers
   const handleCreateSnapshot = async (name?: string) => {
@@ -344,6 +403,13 @@ export function App() {
 
   const handleDeleteSnapshot = async (snapshotId: string) => {
     if (!project) return;
+    if (isClientModeRef.current) {
+      setProject(prev => prev ? {
+        ...prev,
+        restorePoints: (prev.restorePoints || []).filter(s => s.id !== snapshotId)
+      } : prev);
+      return;
+    }
     const res = await safeFetchJson<any>(`/api/projects/${project.projectId}/snapshots/${snapshotId}`, {
       method: 'DELETE'
     });

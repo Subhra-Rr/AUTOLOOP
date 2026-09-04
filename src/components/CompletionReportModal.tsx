@@ -46,6 +46,19 @@ export function CompletionReportModal({
   const totalDodCount = project.definitionOfDone.length;
   const hasTests = project.testCases.length > 0;
   const previewUrl = `/api/projects/${project.projectId}/preview`;
+  const htmlFile = project.files.find(f => f.path.endsWith('.html') || f.path === 'index.html');
+
+  const previewHref = React.useMemo(() => {
+    if (htmlFile?.content) {
+      try {
+        const blob = new Blob([htmlFile.content], { type: 'text/html;charset=utf-8' });
+        return URL.createObjectURL(blob);
+      } catch {
+        return previewUrl;
+      }
+    }
+    return previewUrl;
+  }, [htmlFile?.content, previewUrl]);
 
   const handleExportFullReport = () => {
     const report = {
@@ -153,7 +166,7 @@ export function CompletionReportModal({
             </p>
           </div>
           <a
-            href={previewUrl}
+            href={previewHref}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-black text-xs font-mono font-bold transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)] shrink-0"
