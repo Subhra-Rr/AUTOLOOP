@@ -1,9 +1,0 @@
-{
-  "name": "proj_2znixmk",
-  "version": "1.0.0",
-  "type": "module",
-  "description": "Scientific Precision Calculator Engine",
-  "scripts": {
-    "test": "node --test"
-  }
-}
