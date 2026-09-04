@@ -2067,28 +2067,28 @@ function generateUniversalBundle(prompt: string): DomainBundle {
       <form onsubmit="handleAddItem(event)">
         <div class="form-grid">
           <div class="input-group">
-            <label class="input-label">${cfg.field1.label}</label>
-            <input type="text" id="fTitle" placeholder="${cfg.field1.placeholder}" required />
+            <label class="input-label" for="fTitle">${cfg.field1.label}</label>
+            <input type="text" id="fTitle" name="fTitle" placeholder="${cfg.field1.placeholder}" required />
           </div>
           <div class="input-group">
-            <label class="input-label">${cfg.field2.label}</label>
-            <select id="fCategory">
+            <label class="input-label" for="fCategory">${cfg.field2.label}</label>
+            <select id="fCategory" name="fCategory">
               ${cfg.field2.options.map(o => `<option value="${o}">${o}</option>`).join('')}
             </select>
           </div>
           <div class="input-group">
-            <label class="input-label">${cfg.field3.label}</label>
-            <input type="number" id="fValue" placeholder="${cfg.field3.placeholder}" required />
+            <label class="input-label" for="fValue">${cfg.field3.label}</label>
+            <input type="number" id="fValue" name="fValue" placeholder="${cfg.field3.placeholder}" required />
           </div>
           <div class="input-group">
-            <label class="input-label">${cfg.field4.label}</label>
-            <select id="fStatus">
+            <label class="input-label" for="fStatus">${cfg.field4.label}</label>
+            <select id="fStatus" name="fStatus">
               ${cfg.field4.options.map(o => `<option value="${o}">${o.replace('_', ' ')}</option>`).join('')}
             </select>
           </div>
           <div class="input-group" style="grid-column: 1 / -1;">
-            <label class="input-label">${cfg.field5.label}</label>
-            <textarea id="fNotes" placeholder="${cfg.field5.placeholder}"></textarea>
+            <label class="input-label" for="fNotes">${cfg.field5.label}</label>
+            <textarea id="fNotes" name="fNotes" placeholder="${cfg.field5.placeholder}"></textarea>
           </div>
         </div>
         <div style="margin-top: 14px; display: flex; justify-content: flex-end;">
@@ -2099,7 +2099,7 @@ function generateUniversalBundle(prompt: string): DomainBundle {
 
     <div class="content-card">
       <div class="controls-row">
-        <input type="text" id="searchInput" class="search-box" placeholder="Search ${cfg.entityPlural} by title or category..." oninput="render()" />
+        <input type="text" id="searchInput" name="searchInput" aria-label="Search items" class="search-box" placeholder="Search ${cfg.entityPlural} by title or category..." oninput="render()" />
         <div class="filter-tabs">
           <button class="tab-btn active" onclick="setFilter('ALL')">All</button>
           <button class="tab-btn" onclick="setFilter('ACTIVE')">Active</button>

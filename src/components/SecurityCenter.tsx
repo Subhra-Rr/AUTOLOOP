@@ -160,6 +160,10 @@ export function SecurityCenter({ project }: SecurityCenterProps) {
           <div className="space-y-2.5">
             <div className="relative">
               <input
+                id="securityPolicyTestInput"
+                name="securityPolicyTest"
+                aria-label="Test command against Zero-Trust policy"
+                autoComplete="off"
                 type="text"
                 value={testCmd}
                 onChange={(e) => setTestCmd(e.target.value)}

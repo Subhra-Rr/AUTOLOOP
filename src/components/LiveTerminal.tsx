@@ -307,6 +307,9 @@ export function LiveTerminal({ logs, onClearLogs }: LiveTerminalProps) {
         <div className="flex items-center space-x-2">
           {/* Level Filter */}
           <select
+            id="terminalFilterLevel"
+            name="terminalFilterLevel"
+            aria-label="Filter terminal logs by severity level"
             value={filterLevel}
             onChange={(e) => setFilterLevel(e.target.value)}
             className={`rounded-lg px-2.5 py-1 text-[10px] font-mono focus:outline-none focus:ring-1 ${ts.input}`}
@@ -321,6 +324,9 @@ export function LiveTerminal({ logs, onClearLogs }: LiveTerminalProps) {
 
           {/* Agent Filter */}
           <select
+            id="terminalFilterAgent"
+            name="terminalFilterAgent"
+            aria-label="Filter terminal logs by agent role"
             value={filterAgent}
             onChange={(e) => setFilterAgent(e.target.value)}
             className={`rounded-lg px-2.5 py-1 text-[10px] font-mono focus:outline-none focus:ring-1 ${ts.input}`}
@@ -340,6 +346,10 @@ export function LiveTerminal({ logs, onClearLogs }: LiveTerminalProps) {
         <div className="relative">
           <Search className="w-3 h-3 opacity-40 absolute left-2.5 top-1/2 -translate-y-1/2" />
           <input
+            id="terminalLogSearch"
+            name="terminalLogSearch"
+            aria-label="Filter terminal logs by text query"
+            autoComplete="off"
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

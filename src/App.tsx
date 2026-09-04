@@ -23,13 +23,9 @@ import { HumanInterventionModal } from './components/HumanInterventionModal';
 
 // Detect if running on a static hosting service without an Express backend (e.g. Cloudflare Workers, Pages, GitHub Pages)
 const isStaticDeploy = typeof window !== 'undefined' && (
-  window.location.hostname.includes('workers.dev') ||
-  window.location.hostname.includes('pages.dev') ||
-  window.location.hostname.includes('github.io') ||
-  window.location.hostname.includes('web.app') ||
-  window.location.hostname.includes('firebaseapp.com') ||
-  window.location.hostname.includes('netlify.app') ||
-  window.location.hostname.includes('vercel.app')
+  !window.location.hostname.includes('localhost') &&
+  !window.location.hostname.includes('127.0.0.1') &&
+  !window.location.hostname.endsWith('.run.app')
 );
 
 // Safe API JSON Fetcher helper that never crashes with Unexpected token '<'

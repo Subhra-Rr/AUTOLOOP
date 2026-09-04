@@ -109,6 +109,10 @@ export function RestorePointsView({
       {/* Filter / Search Bar */}
       {snapshots.length > 0 && (
         <input
+          id="snapshotSearchFilter"
+          name="snapshotSearchFilter"
+          aria-label="Filter restore points by keyword"
+          autoComplete="off"
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

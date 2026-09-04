@@ -155,7 +155,10 @@ export function LandingPage({ onStartBuild, isSubmitting = false }: LandingPageP
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-mono uppercase tracking-wider text-white/70 flex items-center space-x-1.5 font-bold">
+                <label 
+                  htmlFor="projectGoalInput" 
+                  className="text-[10px] font-mono uppercase tracking-wider text-white/70 flex items-center space-x-1.5 font-bold cursor-pointer"
+                >
                   <Sparkles className="w-3.5 h-3.5 text-red-400" />
                   <span>PROJECT GOAL & REQUIREMENTS</span>
                 </label>
@@ -167,6 +170,9 @@ export function LandingPage({ onStartBuild, isSubmitting = false }: LandingPageP
               </div>
 
               <textarea
+                id="projectGoalInput"
+                name="projectGoal"
+                autoComplete="off"
                 value={prompt}
                 onChange={(e) => {
                   setPrompt(e.target.value);
@@ -180,10 +186,10 @@ export function LandingPage({ onStartBuild, isSubmitting = false }: LandingPageP
 
             {/* Autonomy Mode Selector */}
             <div className="space-y-2">
-              <label className="text-[10px] font-mono uppercase tracking-wider text-white/70 flex items-center space-x-1.5 font-bold">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-white/70 flex items-center space-x-1.5 font-bold">
                 <ShieldCheck className="w-3.5 h-3.5 text-red-400" />
                 <span>AUTONOMY SUPERVISION POLICY</span>
-              </label>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3">
                 <div
                   onClick={() => setSelectedMode('MAXIMUM')}
@@ -240,9 +246,9 @@ export function LandingPage({ onStartBuild, isSubmitting = false }: LandingPageP
 
             {/* Quick Inspiration Prompts */}
             <div className="space-y-2">
-              <label className="text-[10px] font-mono uppercase tracking-wider text-white/50 font-bold">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-white/50 font-bold">
                 OR SELECT AN EXAMPLE OBJECTIVE:
-              </label>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                 {PROMPT_SUGGESTIONS.map((item, idx) => (
                   <button

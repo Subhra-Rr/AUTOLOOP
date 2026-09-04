@@ -549,13 +549,13 @@ describe('Authentication & RBAC Middleware Test Suite', () => {
       <h2 style="font-size:16px; margin-bottom:16px; color:#fff;">File a New Official Campus Grievance</h2>
       <form id="grievanceForm" onsubmit="handleFormSubmit(event)">
         <div class="form-group">
-          <label>GRIEVANCE TITLE</label>
-          <input type="text" id="titleInput" placeholder="e.g. Wi-Fi outage in Block B 3rd Floor" required minlength="5" />
+          <label for="titleInput">GRIEVANCE TITLE</label>
+          <input type="text" id="titleInput" name="title" placeholder="e.g. Wi-Fi outage in Block B 3rd Floor" required minlength="5" />
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
           <div class="form-group">
-            <label>CATEGORY</label>
-            <select id="categorySelect">
+            <label for="categorySelect">CATEGORY</label>
+            <select id="categorySelect" name="category">
               <option value="FACILITY">Campus Facility / Maintenance</option>
               <option value="ACADEMIC">Academic & Coursework</option>
               <option value="HOSTEL">Hostel & Accommodation</option>
@@ -564,8 +564,8 @@ describe('Authentication & RBAC Middleware Test Suite', () => {
             </select>
           </div>
           <div class="form-group">
-            <label>URGENCY LEVEL</label>
-            <select id="urgencySelect">
+            <label for="urgencySelect">URGENCY LEVEL</label>
+            <select id="urgencySelect" name="urgency">
               <option value="LOW">Low (72h SLA)</option>
               <option value="MEDIUM" selected>Medium (48h SLA)</option>
               <option value="HIGH">High (24h SLA)</option>
@@ -574,11 +574,11 @@ describe('Authentication & RBAC Middleware Test Suite', () => {
           </div>
         </div>
         <div class="form-group">
-          <label>DETAILED DESCRIPTION</label>
-          <textarea id="descInput" rows="4" placeholder="Provide full context, room numbers, dates, and impact..." required minlength="15"></textarea>
+          <label for="descInput">DETAILED DESCRIPTION</label>
+          <textarea id="descInput" name="description" rows="4" placeholder="Provide full context, room numbers, dates, and impact..." required minlength="15"></textarea>
         </div>
         <div class="form-group" style="display:flex; align-items:center; gap:8px;">
-          <input type="checkbox" id="anonCheck" style="width:auto;" />
+          <input type="checkbox" id="anonCheck" name="anonymous" style="width:auto;" />
           <label for="anonCheck" style="margin:0; cursor:pointer;">File Anonymously (Hide Student ID from Faculty)</label>
         </div>
         <button type="submit" class="btn-submit">SUBMIT GRIEVANCE TICKET</button>

@@ -198,6 +198,10 @@ export function CodeViewer({ project, activeFilePath, onSelectFile }: CodeViewer
             <div className="relative flex items-center">
               <Search className="w-3 h-3 text-white/40 absolute left-2 pointer-events-none" />
               <input
+                id="codeSearchInput"
+                name="codeSearch"
+                aria-label="Find in file"
+                autoComplete="off"
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
