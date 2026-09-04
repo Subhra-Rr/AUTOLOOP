@@ -6,6 +6,7 @@ import {
   HumanInterventionRequest,
   SystemStateSnapshot 
 } from './types';
+import { createClientProjectState, executeClientStep } from './services/clientOrchestrator';
 import { Navbar, ActiveTabType } from './components/Navbar';
 import { LandingPage } from './components/LandingPage';
 import { PipelineGraph } from './components/PipelineGraph';
@@ -59,16 +60,40 @@ export function App() {
   const [isStartingBuild, setIsStartingBuild] = useState<boolean>(false);
 
   const loopTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isClientModeRef = useRef<boolean>(false);
 
   // Step runner loop
   const executeStep = async (projectId: string) => {
+    if (isClientModeRef.current && project) {
+      const { project: nextProject, done } = executeClientStep(project);
+      setProject(nextProject);
+      if (nextProject.activeFilePath) {
+        setActiveFilePath(nextProject.activeFilePath);
+      }
+      if (done) {
+        setIsRunning(false);
+        setShowCompletionModal(true);
+      }
+      return;
+    }
+
     const result = await safeFetchJson<any>(`/api/projects/${projectId}/step`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });
 
     if (!result.ok) {
-      console.warn('Autonomous step warning:', result.error);
+      console.warn('Autonomous server step warning, failing over to client engine:', result.error);
+      if (project) {
+        isClientModeRef.current = true;
+        const { project: nextProject, done } = executeClientStep(project);
+        setProject(nextProject);
+        if (done) {
+          setIsRunning(false);
+          setShowCompletionModal(true);
+        }
+        return;
+      }
       setIsRunning(false);
       setGlobalError(result.error || 'Autonomous step execution failed');
       return;
@@ -111,7 +136,7 @@ export function App() {
     };
   }, [isRunning, project]);
 
-  // Project creator handler
+  // Project creator handler with zero-fail hybrid backend & client-engine fallback
   const handleStartBuild = async (prompt: string, mode: AutonomyMode) => {
     setGlobalError(null);
     setIsStartingBuild(true);
@@ -122,21 +147,36 @@ export function App() {
         body: JSON.stringify({ prompt, mode, isLiveGemini: true })
       });
 
-      if (!result.ok) {
-        console.error('Build init error:', result.error);
-        setGlobalError(result.error || 'Failed to initialize real AI project');
-        return;
-      }
-
-      const data = result.data;
-      if (data.project) {
-        setProject(data.project);
+      if (result.ok && result.data?.project) {
+        isClientModeRef.current = false;
+        setProject(result.data.project);
         setActiveTab('workspace');
-        if (data.project.files?.length > 0) {
-          setActiveFilePath(data.project.files[0].path);
+        if (result.data.project.files?.length > 0) {
+          setActiveFilePath(result.data.project.files[0].path);
         }
-        setIsRunning(data.project.status !== 'BLOCKED' && data.project.status !== 'COMPLETED');
+        setIsRunning(result.data.project.status !== 'BLOCKED' && result.data.project.status !== 'COMPLETED');
+      } else {
+        // Backend returned 405 (Method Not Allowed / static CDN / shared preview) or 404/500
+        console.warn('Backend server returned non-OK or 405, starting in-browser Autonomous Engine:', result.error);
+        isClientModeRef.current = true;
+        const clientProject = createClientProjectState(prompt, mode);
+        setProject(clientProject);
+        setActiveTab('workspace');
+        if (clientProject.files?.length > 0) {
+          setActiveFilePath(clientProject.files[0].path);
+        }
+        setIsRunning(true);
       }
+    } catch (err: any) {
+      console.warn('Connection failed, starting in-browser Autonomous Engine:', err);
+      isClientModeRef.current = true;
+      const clientProject = createClientProjectState(prompt, mode);
+      setProject(clientProject);
+      setActiveTab('workspace');
+      if (clientProject.files?.length > 0) {
+        setActiveFilePath(clientProject.files[0].path);
+      }
+      setIsRunning(true);
     } finally {
       setIsStartingBuild(false);
     }
@@ -235,6 +275,30 @@ export function App() {
     if (!project) return;
     setIsTakingSnapshot(true);
     try {
+      if (isClientModeRef.current) {
+        const snapId = 'snap_' + Math.random().toString(36).substring(2, 9);
+        const snapshot: SystemStateSnapshot = {
+          id: snapId,
+          projectId: project.projectId,
+          name: name || `Milestone ${project.activeNode}`,
+          timestamp: new Date().toISOString(),
+          stage: project.activeNode,
+          completedTasks: project.metrics.completedTasks,
+          totalTasks: project.metrics.totalTasks,
+          filesCount: project.files.length,
+          tokensUsed: project.tokensUsed,
+          elapsedSeconds: project.elapsedSeconds,
+          summary: `Captured state at ${project.activeNode}`,
+          stateDumpJson: JSON.stringify(project),
+          isAutomatic: false
+        };
+        const updatedPoints = [snapshot, ...(project.restorePoints || [])];
+        setProject(prev => prev ? { ...prev, restorePoints: updatedPoints } : prev);
+        setRestoreToast(`Snapshot captured: "${snapshot.name}"`);
+        setTimeout(() => setRestoreToast(null), 3500);
+        return;
+      }
+
       const res = await safeFetchJson<any>(`/api/projects/${project.projectId}/snapshots`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -253,6 +317,17 @@ export function App() {
   const handleRestoreSnapshot = async (snapshot: SystemStateSnapshot) => {
     if (!project) return;
     setIsRunning(false);
+    if (isClientModeRef.current) {
+      try {
+        const restored = JSON.parse(snapshot.stateDumpJson);
+        setProject(restored);
+        setRestoreToast(`System state restored to: "${snapshot.name}"`);
+        setTimeout(() => setRestoreToast(null), 4000);
+      } catch (e) {
+        setGlobalError('Failed to parse snapshot state');
+      }
+      return;
+    }
     const res = await safeFetchJson<any>(`/api/projects/${project.projectId}/restore`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

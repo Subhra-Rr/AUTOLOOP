@@ -51,6 +51,19 @@ export function LivePreview({ project }: LivePreviewProps) {
   const hasFiles = project.files.length > 0;
   const isReady = hasFiles && (htmlFile !== undefined || project.status === 'COMPLETED');
 
+  // Generate safe in-memory blob URL for new tab opening across all environments
+  const previewHref = React.useMemo(() => {
+    if (htmlFile?.content) {
+      try {
+        const blob = new Blob([htmlFile.content], { type: 'text/html;charset=utf-8' });
+        return URL.createObjectURL(blob);
+      } catch {
+        return previewUrl;
+      }
+    }
+    return previewUrl;
+  }, [htmlFile?.content, previewUrl]);
+
   const handleRefresh = () => {
     setIsLoading(true);
     setIframeKey(Date.now());
@@ -241,7 +254,7 @@ export function LivePreview({ project }: LivePreviewProps) {
 
           {/* Open in New Window (Anchor tag for 100% mobile browser compatibility) */}
           <a
-            href={previewUrl}
+            href={previewHref}
             target="_blank"
             rel="noopener noreferrer"
             title="Open Live App in Dedicated Tab"
@@ -280,7 +293,8 @@ export function LivePreview({ project }: LivePreviewProps) {
           >
             <iframe
               key={iframeKey}
-              src={previewUrl}
+              srcDoc={htmlFile?.content || undefined}
+              src={!htmlFile?.content ? previewUrl : undefined}
               title="Generated Real Web Application"
               className="w-full h-full border-0 bg-white"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"

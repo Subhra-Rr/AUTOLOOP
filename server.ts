@@ -12,6 +12,22 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
+// Global CORS & preflight OPTIONS middleware
+app.use((req: Request, res: Response, next: any) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
+
+// Explicit OPTIONS preflight handler for any route
+app.options('*', (req: Request, res: Response) => {
+  res.status(200).end();
+});
+
 app.use(express.json({ limit: '10mb' }));
 
 // In-memory project state store
@@ -23,6 +39,14 @@ app.get('/api/health', (req: Request, res: Response) => {
     status: 'ok', 
     timestamp: new Date().toISOString(),
     geminiConfigured: !!process.env.GEMINI_API_KEY
+  });
+});
+
+// List existing projects
+app.get('/api/projects', (req: Request, res: Response) => {
+  res.json({ 
+    success: true, 
+    projects: Array.from(projectsStore.values()) 
   });
 });
 
