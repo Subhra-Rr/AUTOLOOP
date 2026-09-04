@@ -3,7 +3,8 @@ import {
   ProjectState, 
   AutonomyMode, 
   PipelineNodeId, 
-  HumanInterventionRequest 
+  HumanInterventionRequest,
+  SystemStateSnapshot 
 } from './types';
 import { Navbar, ActiveTabType } from './components/Navbar';
 import { LandingPage } from './components/LandingPage';
@@ -53,6 +54,8 @@ export function App() {
   const [showCompletionModal, setShowCompletionModal] = useState<boolean>(false);
   const [pendingIntervention, setPendingIntervention] = useState<HumanInterventionRequest | null>(null);
   const [globalError, setGlobalError] = useState<string | null>(null);
+  const [isTakingSnapshot, setIsTakingSnapshot] = useState<boolean>(false);
+  const [restoreToast, setRestoreToast] = useState<string | null>(null);
 
   const loopTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -175,6 +178,99 @@ export function App() {
     }
   };
 
+  const handleNodeFeedback = async (nodeId: string, sentiment: 'UP' | 'DOWN') => {
+    if (!project) return;
+    setProject(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        nodeFeedback: {
+          ...(prev.nodeFeedback || {}),
+          [nodeId]: sentiment
+        }
+      };
+    });
+
+    const res = await safeFetchJson<any>(`/api/projects/${project.projectId}/feedback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nodeId, sentiment })
+    });
+
+    if (res.ok && res.data?.project) {
+      setProject(res.data.project);
+    }
+  };
+
+  // Periodic System State Snapshot (Every 30 seconds while active)
+  useEffect(() => {
+    if (!project || project.status === 'COMPLETED' || project.status === 'ABORTED') return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await safeFetchJson<any>(`/api/projects/${project.projectId}/snapshots`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isAutomatic: true })
+        });
+        if (res.ok && res.data?.project) {
+          setProject(prev => prev ? { ...prev, restorePoints: res.data.project.restorePoints } : prev);
+        }
+      } catch (e) {
+        console.error('Periodic snapshot failed:', e);
+      }
+    }, 30000); // 30s interval
+
+    return () => clearInterval(interval);
+  }, [project?.projectId, project?.status]);
+
+  // Snapshot handlers
+  const handleCreateSnapshot = async (name?: string) => {
+    if (!project) return;
+    setIsTakingSnapshot(true);
+    try {
+      const res = await safeFetchJson<any>(`/api/projects/${project.projectId}/snapshots`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, isAutomatic: false })
+      });
+      if (res.ok && res.data?.project) {
+        setProject(res.data.project);
+        setRestoreToast(`Snapshot captured: "${res.data.snapshot.name}"`);
+        setTimeout(() => setRestoreToast(null), 3500);
+      }
+    } finally {
+      setIsTakingSnapshot(false);
+    }
+  };
+
+  const handleRestoreSnapshot = async (snapshot: SystemStateSnapshot) => {
+    if (!project) return;
+    setIsRunning(false);
+    const res = await safeFetchJson<any>(`/api/projects/${project.projectId}/restore`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ snapshotId: snapshot.id })
+    });
+    if (res.ok && res.data?.project) {
+      setProject(res.data.project);
+      setRestoreToast(`System state restored to: "${snapshot.name}"`);
+      setTimeout(() => setRestoreToast(null), 4000);
+    } else {
+      setGlobalError(res.error || 'Failed to restore project snapshot');
+    }
+  };
+
+  const handleDeleteSnapshot = async (snapshotId: string) => {
+    if (!project) return;
+    const res = await safeFetchJson<any>(`/api/projects/${project.projectId}/snapshots/${snapshotId}`, {
+      method: 'DELETE'
+    });
+    if (res.ok && res.data?.project) {
+      setProject(prev => prev ? { ...prev, restorePoints: res.data.project.restorePoints } : prev);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#030712] text-[#f1f5f9] flex flex-col selection:bg-cyan-500 selection:text-black relative overflow-x-hidden">
       {/* Immersive background glowing mesh and animated glass orbs */}
@@ -213,12 +309,33 @@ export function App() {
         </div>
       )}
 
+      {/* System Restore Toast Banner */}
+      {restoreToast && (
+        <div className="glass-panel bg-cyan-950/50 border-b border-cyan-500/40 px-4 py-2.5 flex items-center justify-between text-xs font-mono text-cyan-200 z-50 backdrop-blur-xl animate-fadeIn">
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.9)]" />
+            <span className="font-bold uppercase text-cyan-300">[RESTORE_POINT]:</span>
+            <span>{restoreToast}</span>
+          </div>
+          <button 
+            onClick={() => setRestoreToast(null)}
+            className="px-2.5 py-1 rounded bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border border-cyan-500/40 text-[10px] glass-button transition-colors"
+          >
+            DISMISS
+          </button>
+        </div>
+      )}
+
       {!project ? (
         <LandingPage onStartBuild={handleStartBuild} />
       ) : (
         <main className="flex-1 p-3 sm:p-4 lg:p-6 max-w-[1700px] w-full mx-auto space-y-4 sm:space-y-6 relative z-10">
           {/* Always Visible Pipeline Node Graph on Workspace Tab */}
-          <PipelineGraph project={project} onSelectNode={handleSelectNode} />
+          <PipelineGraph 
+            project={project} 
+            onSelectNode={handleSelectNode} 
+            onNodeFeedback={handleNodeFeedback}
+          />
 
           {/* Tab Views */}
           {activeTab === 'preview' && (
@@ -237,6 +354,10 @@ export function App() {
                     const t = project.tasks.find(x => x.id === id);
                     if (t?.code === 'TASK-008') setActiveTab('repair');
                   }}
+                  onRestoreSnapshot={handleRestoreSnapshot}
+                  onCreateSnapshot={handleCreateSnapshot}
+                  onDeleteSnapshot={handleDeleteSnapshot}
+                  isTakingSnapshot={isTakingSnapshot}
                 />
               </div>
 

@@ -286,7 +286,29 @@ export interface ProjectState {
     repairCyclesCount: number;
   };
   isLiveGemini: boolean;
+  nodeFeedback?: Record<string, 'UP' | 'DOWN'>;
+  restorePoints?: SystemStateSnapshot[];
 }
+
+export interface SystemStateSnapshot {
+  id: string;
+  projectId: string;
+  name: string;
+  timestamp: string;
+  stage: PipelineNodeId;
+  taskCode?: string;
+  taskTitle?: string;
+  completedTasks: number;
+  totalTasks: number;
+  filesCount: number;
+  tokensUsed: number;
+  elapsedSeconds: number;
+  summary: string;
+  stateDumpJson: string;
+  isAutomatic?: boolean;
+}
+
+export type TerminalTheme = 'matrix-green' | 'classic-amber' | 'default-white';
 
 export interface ProjectTemplate {
   id: string;

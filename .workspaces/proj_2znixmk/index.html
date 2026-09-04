@@ -3,67 +3,401 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Precision Calculator</title>
+  <title>Precision Scientific Calculator</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: #0c0d12; color: #f1f3f9; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
-    .calculator-card { background: #161822; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); width: 100%; max-width: 380px; overflow: hidden; }
-    .header { padding: 16px 20px 8px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .title { font-size: 13px; font-weight: 700; color: #06b6d4; text-transform: uppercase; letter-spacing: 1px; }
-    .mode-badge { font-size: 10px; background: rgba(6,182,212,0.15); color: #22d3ee; padding: 3px 8px; border-radius: 12px; font-weight: 600; }
-    .display-area { padding: 24px 20px 16px; text-align: right; background: #0f1017; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .history-line { font-size: 13px; color: #71717a; min-height: 18px; margin-bottom: 6px; font-family: monospace; word-break: break-all; }
-    .main-display { font-size: 38px; font-weight: 700; color: #ffffff; min-height: 48px; font-family: monospace; overflow-x: auto; white-space: nowrap; }
-    .keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 20px; }
-    button { border: none; border-radius: 14px; height: 56px; font-size: 19px; font-weight: 600; cursor: pointer; transition: all 0.12s ease; display: flex; align-items: center; justify-content: center; user-select: none; }
-    button:active { transform: scale(0.94); }
-    .btn-num { background: #222533; color: #e4e4e7; }
-    .btn-num:hover { background: #2c3042; }
-    .btn-op { background: #1e293b; color: #38bdf8; font-size: 21px; }
-    .btn-op:hover { background: #29384d; }
-    .btn-func { background: #27272a; color: #a1a1aa; font-size: 16px; }
-    .btn-func:hover { background: #3f3f46; color: #ffffff; }
-    .btn-equal { background: #06b6d4; color: #000000; font-size: 24px; font-weight: 700; grid-column: span 1; box-shadow: 0 4px 15px rgba(6,182,212,0.4); }
-    .btn-equal:hover { background: #22d3ee; }
-    .btn-clear { background: #ef4444; color: #ffffff; }
-    .btn-clear:hover { background: #dc2626; }
-    .history-tape { max-height: 120px; overflow-y: auto; padding: 12px 20px; background: #12131b; border-top: 1px solid rgba(255,255,255,0.05); font-family: monospace; font-size: 11px; color: #a1a1aa; }
-    .history-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); cursor: pointer; }
-    .history-item:hover { color: #38bdf8; }
+    
+    .calculator-card {
+      background: #161822;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65), 0 0 30px rgba(6, 182, 212, 0.05);
+      width: 100%;
+      max-width: 400px;
+      overflow: hidden;
+      transition: max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .header {
+      padding: 16px 20px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #06b6d4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .mem-indicator {
+      display: none;
+      background: rgba(6, 182, 212, 0.2);
+      color: #22d3ee;
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+    }
+    .mode-toggle-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      padding: 5px 12px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .mode-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border-color: rgba(6, 182, 212, 0.4);
+    }
+    .mode-toggle-btn.active {
+      background: rgba(6, 182, 212, 0.16);
+      color: #22d3ee;
+      border-color: rgba(6, 182, 212, 0.5);
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.25);
+    }
+    .toggle-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #64748b;
+      transition: all 0.2s ease;
+    }
+    .mode-toggle-btn.active .toggle-dot {
+      background: #22d3ee;
+      box-shadow: 0 0 6px #22d3ee;
+    }
+
+    .display-area {
+      padding: 22px 20px 14px;
+      text-align: right;
+      background: #0d0f16;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+    }
+    .history-line {
+      font-size: 13px;
+      color: #71717a;
+      min-height: 18px;
+      margin-bottom: 6px;
+      font-family: monospace;
+      word-break: break-all;
+    }
+    .main-display {
+      font-size: 38px;
+      font-weight: 700;
+      color: #ffffff;
+      min-height: 48px;
+      font-family: monospace;
+      overflow-x: auto;
+      white-space: nowrap;
+      will-change: transform, opacity;
+      transform-origin: right center;
+      transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.4, 1), opacity 0.12s ease;
+    }
+    .main-display.num-enter {
+      animation: numberEnter 0.16s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+    }
+    .main-display.result-calc {
+      animation: resultPulse 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes numberEnter {
+      0% {
+        transform: scale(0.97) translateY(1px);
+        opacity: 0.88;
+      }
+      60% {
+        transform: scale(1.02);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+    }
+    @keyframes resultPulse {
+      0% {
+        transform: scale(0.95);
+        text-shadow: 0 0 20px rgba(6, 182, 212, 0.9), 0 0 10px rgba(34, 211, 238, 0.8);
+        color: #67e8f9;
+      }
+      50% {
+        transform: scale(1.04);
+        text-shadow: 0 0 12px rgba(6, 182, 212, 0.7);
+      }
+      100% {
+        transform: scale(1);
+        text-shadow: none;
+        color: #ffffff;
+      }
+    }
+
+    .status-toast {
+      position: absolute;
+      top: 8px;
+      left: 20px;
+      font-size: 10px;
+      font-family: monospace;
+      color: #06b6d4;
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      padding: 2px 8px;
+      border-radius: 6px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+    .status-toast.visible {
+      opacity: 1;
+    }
+
+    /* Memory Toolbar (MC, MR, MS, M+) */
+    .memory-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 12px 20px 4px;
+    }
+    .btn-mem {
+      height: 36px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      color: #94a3b8;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: monospace;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-mem:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #f1f5f9;
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .btn-mem:active {
+      transform: scale(0.95);
+    }
+    .btn-mem.has-data {
+      color: #22d3ee;
+      border-color: rgba(6, 182, 212, 0.35);
+      background: rgba(6, 182, 212, 0.08);
+    }
+
+    /* Scientific Panel (Square Root, Exponentiation, Pi, Square) */
+    .scientific-panel {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 0 20px;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, padding 0.25s ease;
+    }
+    .scientific-panel.open {
+      max-height: 70px;
+      opacity: 1;
+      padding: 8px 20px 0;
+    }
+    .btn-sci {
+      background: #192231;
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      height: 48px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    .btn-sci:hover {
+      background: #233147;
+      color: #7dd3fc;
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+    }
+    .btn-sci:active {
+      transform: scale(0.94);
+    }
+
+    /* Primary Keypad */
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 12px 20px 18px;
+    }
+    button {
+      border: none;
+      border-radius: 14px;
+      height: 54px;
+      font-size: 19px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    button:active {
+      transform: scale(0.94);
+    }
+    .btn-num {
+      background: #222533;
+      color: #e4e4e7;
+    }
+    .btn-num:hover {
+      background: #2c3042;
+    }
+    .btn-op {
+      background: #1e293b;
+      color: #38bdf8;
+      font-size: 21px;
+    }
+    .btn-op:hover {
+      background: #29384d;
+    }
+    .btn-op.active-op {
+      background: #0369a1;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
+    }
+    .btn-func {
+      background: #27272a;
+      color: #a1a1aa;
+      font-size: 16px;
+    }
+    .btn-func:hover {
+      background: #3f3f46;
+      color: #ffffff;
+    }
+    .btn-equal {
+      background: #06b6d4;
+      color: #000000;
+      font-size: 24px;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+    }
+    .btn-equal:hover {
+      background: #22d3ee;
+    }
+    .btn-clear {
+      background: #ef4444;
+      color: #ffffff;
+    }
+    .btn-clear:hover {
+      background: #dc2626;
+    }
+
+    .history-tape {
+      max-height: 120px;
+      overflow-y: auto;
+      padding: 12px 20px;
+      background: #12131b;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-family: monospace;
+      font-size: 11px;
+      color: #a1a1aa;
+    }
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+    }
+    .history-item:hover {
+      color: #38bdf8;
+    }
   </style>
 </head>
 <body>
-  <div class="calculator-card">
+  <div class="calculator-card" id="calcCard">
     <div class="header">
-      <span class="title">AUTOLOOP PRECISION CALC</span>
-      <span class="mode-badge">STANDARD</span>
+      <div class="header-left">
+        <span class="title">AUTOLOOP PRECISION CALC</span>
+        <span id="memIndicator" class="mem-indicator">M</span>
+      </div>
+      <button id="modeToggleBtn" class="mode-toggle-btn" onclick="toggleScientificMode()" title="Toggle Scientific Mode">
+        <span class="toggle-dot"></span>
+        <span id="modeText">SCIENTIFIC</span>
+      </button>
     </div>
     
     <div class="display-area">
+      <div id="statusToast" class="status-toast">Ready</div>
       <div id="historyDisplay" class="history-line"></div>
       <div id="mainDisplay" class="main-display">0</div>
     </div>
 
+    <!-- Memory Buttons Bar (MC, MR, MS, M+) -->
+    <div class="memory-bar">
+      <button class="btn-mem" id="btnMC" onclick="memoryClear()" title="Memory Clear (MC)">MC</button>
+      <button class="btn-mem" id="btnMR" onclick="memoryRecall()" title="Memory Recall (MR)">MR</button>
+      <button class="btn-mem" id="btnMS" onclick="memoryStore()" title="Memory Store (MS)">MS</button>
+      <button class="btn-mem" id="btnMPlus" onclick="memoryAdd()" title="Memory Add (M+)">M+</button>
+    </div>
+
+    <!-- Scientific Mode Panel: Square Root, Exponentiation, Pi, Square -->
+    <div class="scientific-panel" id="scientificPanel">
+      <button class="btn-sci" onclick="handleSqrt()" title="Square Root (√)">√</button>
+      <button class="btn-sci" onclick="handleOp('^')" title="Exponentiation (xʸ)">xʸ</button>
+      <button class="btn-sci" onclick="insertPi()" title="Pi (π)">π</button>
+      <button class="btn-sci" onclick="handleSquare()" title="Square (x²)">x²</button>
+    </div>
+
+    <!-- Main Keypad -->
     <div class="keypad">
       <button class="btn-clear" onclick="clearAll()">AC</button>
       <button class="btn-func" onclick="clearEntry()">C</button>
       <button class="btn-func" onclick="deleteLast()">⌫</button>
-      <button class="btn-op" onclick="handleOp('/')">/</button>
+      <button class="btn-op" id="op_div" onclick="handleOp('/')">/</button>
 
       <button class="btn-num" onclick="appendNum('7')">7</button>
       <button class="btn-num" onclick="appendNum('8')">8</button>
       <button class="btn-num" onclick="appendNum('9')">9</button>
-      <button class="btn-op" onclick="handleOp('*')">×</button>
+      <button class="btn-op" id="op_mul" onclick="handleOp('*')">×</button>
 
       <button class="btn-num" onclick="appendNum('4')">4</button>
       <button class="btn-num" onclick="appendNum('5')">5</button>
       <button class="btn-num" onclick="appendNum('6')">6</button>
-      <button class="btn-op" onclick="handleOp('-')">-</button>
+      <button class="btn-op" id="op_sub" onclick="handleOp('-')">-</button>
 
       <button class="btn-num" onclick="appendNum('1')">1</button>
       <button class="btn-num" onclick="appendNum('2')">2</button>
       <button class="btn-num" onclick="appendNum('3')">3</button>
-      <button class="btn-op" onclick="handleOp('+')">+</button>
+      <button class="btn-op" id="op_add" onclick="handleOp('+')">+</button>
 
       <button class="btn-func" onclick="toggleSign()">±</button>
       <button class="btn-num" onclick="appendNum('0')">0</button>
@@ -72,7 +406,7 @@
     </div>
 
     <div id="historyTape" class="history-tape">
-      <div style="text-align:center; color:#52525b; font-size:10px;">Calculation Log (Click to recall)</div>
+      <div style="text-align:center; color:#52525b; font-size:10px; margin-bottom:4px;">Calculation Log (Click to recall)</div>
     </div>
   </div>
 
@@ -81,21 +415,82 @@
     let previousInput = null;
     let currentOp = null;
     let resetOnNextNum = false;
+    let isScientificMode = false;
+    let memoryValue = 0;
+    let isMemorySet = false;
     const historyLogs = [];
+    let toastTimeout = null;
 
     const mainDisplay = document.getElementById('mainDisplay');
     const historyDisplay = document.getElementById('historyDisplay');
     const historyTape = document.getElementById('historyTape');
+    const scientificPanel = document.getElementById('scientificPanel');
+    const modeToggleBtn = document.getElementById('modeToggleBtn');
+    const modeText = document.getElementById('modeText');
+    const memIndicator = document.getElementById('memIndicator');
+    const btnMC = document.getElementById('btnMC');
+    const btnMR = document.getElementById('btnMR');
+    const statusToast = document.getElementById('statusToast');
 
-    function updateDisplay() {
-      mainDisplay.textContent = currentInput;
-      if (previousInput !== null && currentOp !== null) {
-        historyDisplay.textContent = previousInput + ' ' + (currentOp === '*' ? '×' : currentOp) + ' ' + (resetOnNextNum ? '' : currentInput);
+    // Smooth Display Animation Trigger
+    function triggerAnimation(type = 'enter') {
+      mainDisplay.classList.remove('num-enter', 'result-calc');
+      void mainDisplay.offsetWidth; // Force CSS reflow to re-trigger transition animation
+      if (type === 'result') {
+        mainDisplay.classList.add('result-calc');
       } else {
-        historyDisplay.textContent = '';
+        mainDisplay.classList.add('num-enter');
       }
     }
 
+    function showStatusToast(message) {
+      if (!statusToast) return;
+      statusToast.textContent = message;
+      statusToast.classList.add('visible');
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        statusToast.classList.remove('visible');
+      }, 1800);
+    }
+
+    function updateDisplay(animate = false, animType = 'enter') {
+      mainDisplay.textContent = currentInput;
+      if (previousInput !== null && currentOp !== null) {
+        const symbol = currentOp === '*' ? '×' : (currentOp === '^' ? '^' : currentOp);
+        historyDisplay.textContent = previousInput + ' ' + symbol + ' ' + (resetOnNextNum ? '' : currentInput);
+      } else {
+        historyDisplay.textContent = '';
+      }
+
+      // Highlight active operator button
+      document.querySelectorAll('.btn-op').forEach(btn => btn.classList.remove('active-op'));
+      if (currentOp === '+') document.getElementById('op_add')?.classList.add('active-op');
+      else if (currentOp === '-') document.getElementById('op_sub')?.classList.add('active-op');
+      else if (currentOp === '*') document.getElementById('op_mul')?.classList.add('active-op');
+      else if (currentOp === '/') document.getElementById('op_div')?.classList.add('active-op');
+
+      if (animate) {
+        triggerAnimation(animType);
+      }
+    }
+
+    // Mode Toggle
+    function toggleScientificMode() {
+      isScientificMode = !isScientificMode;
+      if (isScientificMode) {
+        scientificPanel.classList.add('open');
+        modeToggleBtn.classList.add('active');
+        modeText.textContent = 'SCIENTIFIC';
+        showStatusToast('Scientific Mode Enabled');
+      } else {
+        scientificPanel.classList.remove('open');
+        modeToggleBtn.classList.remove('active');
+        modeText.textContent = 'STANDARD';
+        showStatusToast('Standard Mode Enabled');
+      }
+    }
+
+    // Number & Input Handling
     function appendNum(num) {
       if (currentInput === '0' || resetOnNextNum || currentInput === 'Error') {
         currentInput = num;
@@ -105,7 +500,7 @@
           currentInput += num;
         }
       }
-      updateDisplay();
+      updateDisplay(true, 'enter');
     }
 
     function appendDot() {
@@ -115,7 +510,7 @@
       } else if (!currentInput.includes('.')) {
         currentInput += '.';
       }
-      updateDisplay();
+      updateDisplay(true, 'enter');
     }
 
     function toggleSign() {
@@ -125,7 +520,7 @@
       } else {
         currentInput = '-' + currentInput;
       }
-      updateDisplay();
+      updateDisplay(true, 'enter');
     }
 
     function handleOp(op) {
@@ -136,9 +531,101 @@
       previousInput = currentInput;
       currentOp = op;
       resetOnNextNum = true;
-      updateDisplay();
+      updateDisplay(false);
     }
 
+    // Scientific Calculations
+    function handleSqrt() {
+      if (currentInput === 'Error') clearAll();
+      const val = parseFloat(currentInput);
+      if (val < 0) {
+        currentInput = 'Error';
+        previousInput = null;
+        currentOp = null;
+        resetOnNextNum = true;
+        updateDisplay(true, 'result');
+        showStatusToast('Invalid: Negative √');
+        return;
+      }
+      const res = Math.round(Math.sqrt(val) * 10000000000) / 10000000000;
+      addHistory('√(' + val + ') = ' + res, res);
+      currentInput = String(res);
+      resetOnNextNum = true;
+      updateDisplay(true, 'result');
+      showStatusToast('√(' + val + ') = ' + res);
+    }
+
+    function handleSquare() {
+      if (currentInput === 'Error') clearAll();
+      const val = parseFloat(currentInput);
+      const res = Math.round(Math.pow(val, 2) * 10000000000) / 10000000000;
+      addHistory('sqr(' + val + ') = ' + res, res);
+      currentInput = String(res);
+      resetOnNextNum = true;
+      updateDisplay(true, 'result');
+      showStatusToast('sqr(' + val + ') = ' + res);
+    }
+
+    function insertPi() {
+      const piVal = '3.1415926535';
+      currentInput = piVal;
+      resetOnNextNum = true;
+      updateDisplay(true, 'enter');
+      showStatusToast('Constant: π');
+    }
+
+    // Memory Functions: MC, MR, MS, M+
+    function memoryClear() {
+      memoryValue = 0;
+      isMemorySet = false;
+      updateMemoryUI();
+      showStatusToast('Memory Cleared (MC)');
+    }
+
+    function memoryRecall() {
+      if (!isMemorySet) {
+        showStatusToast('Memory Empty (MR)');
+        return;
+      }
+      currentInput = String(memoryValue);
+      resetOnNextNum = true;
+      updateDisplay(true, 'enter');
+      showStatusToast('Recalled: ' + memoryValue);
+    }
+
+    function memoryStore() {
+      if (currentInput === 'Error') return;
+      const val = parseFloat(currentInput);
+      if (isNaN(val)) return;
+      memoryValue = val;
+      isMemorySet = true;
+      updateMemoryUI();
+      showStatusToast('Stored in Memory: ' + memoryValue);
+    }
+
+    function memoryAdd() {
+      if (currentInput === 'Error') return;
+      const val = parseFloat(currentInput);
+      if (isNaN(val)) return;
+      memoryValue = (isMemorySet ? memoryValue : 0) + val;
+      isMemorySet = true;
+      updateMemoryUI();
+      showStatusToast('Memory (M+): ' + memoryValue);
+    }
+
+    function updateMemoryUI() {
+      if (isMemorySet) {
+        memIndicator.style.display = 'inline-flex';
+        btnMR.classList.add('has-data');
+        btnMC.classList.add('has-data');
+      } else {
+        memIndicator.style.display = 'none';
+        btnMR.classList.remove('has-data');
+        btnMC.classList.remove('has-data');
+      }
+    }
+
+    // Calculation Engine
     function computeResult() {
       if (previousInput === null || currentOp === null || currentInput === 'Error') return;
       const a = parseFloat(previousInput);
@@ -154,22 +641,27 @@
           previousInput = null;
           currentOp = null;
           resetOnNextNum = true;
-          updateDisplay();
+          updateDisplay(true, 'result');
+          showStatusToast('Error: Division by 0');
           return;
         }
         result = a / b;
       }
+      else if (currentOp === '^') {
+        result = Math.pow(a, b);
+      }
 
-      // Fix JavaScript float precision
+      // Precision rounding
       result = Math.round(result * 10000000000) / 10000000000;
-      const expr = a + ' ' + (currentOp === '*' ? '×' : currentOp) + ' ' + b + ' = ' + result;
+      const symbol = currentOp === '*' ? '×' : (currentOp === '^' ? '^' : currentOp);
+      const expr = a + ' ' + symbol + ' ' + b + ' = ' + result;
       addHistory(expr, result);
 
       currentInput = String(result);
       previousInput = null;
       currentOp = null;
       resetOnNextNum = true;
-      updateDisplay();
+      updateDisplay(true, 'result');
     }
 
     function clearAll() {
@@ -177,12 +669,13 @@
       previousInput = null;
       currentOp = null;
       resetOnNextNum = false;
-      updateDisplay();
+      updateDisplay(false);
+      showStatusToast('All Cleared (AC)');
     }
 
     function clearEntry() {
       currentInput = '0';
-      updateDisplay();
+      updateDisplay(false);
     }
 
     function deleteLast() {
@@ -195,12 +688,12 @@
       } else {
         currentInput = '0';
       }
-      updateDisplay();
+      updateDisplay(true, 'enter');
     }
 
     function addHistory(expr, val) {
       historyLogs.unshift({ expr, val });
-      if (historyLogs.length > 6) historyLogs.pop();
+      if (historyLogs.length > 8) historyLogs.pop();
       renderHistory();
     }
 
@@ -213,7 +706,7 @@
         row.onclick = () => {
           currentInput = String(item.val);
           resetOnNextNum = true;
-          updateDisplay();
+          updateDisplay(true, 'enter');
         };
         historyTape.appendChild(row);
       });
@@ -227,6 +720,8 @@
       else if (e.key === '-') handleOp('-');
       else if (e.key === '*') handleOp('*');
       else if (e.key === '/') { e.preventDefault(); handleOp('/'); }
+      else if (e.key === '^') { e.preventDefault(); handleOp('^'); }
+      else if (e.key === 'p' || e.key === 'P') insertPi();
       else if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); computeResult(); }
       else if (e.key === 'Backspace') deleteLast();
       else if (e.key === 'Escape') clearAll();

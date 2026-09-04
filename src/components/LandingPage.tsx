@@ -76,20 +76,20 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
   return (
     <div className="min-h-[calc(100vh-4rem)] flex flex-col justify-between relative overflow-hidden">
       {/* Background subtle radial glows & engineering grid */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-25 pointer-events-none" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[750px] h-[450px] bg-gradient-to-tr from-cyan-600/15 via-indigo-600/15 to-emerald-600/15 blur-[140px] rounded-full pointer-events-none" />
+      <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[750px] h-[450px] bg-gradient-to-tr from-red-700/25 via-rose-950/30 to-red-900/20 blur-[140px] rounded-full pointer-events-none" />
 
       <main className="relative max-w-6xl mx-auto px-3 sm:px-6 pt-6 sm:pt-10 pb-12 sm:pb-16 w-full space-y-6 sm:space-y-10">
         {/* Eyebrow & Main Hero */}
         <div className="text-center space-y-3 sm:space-y-4 max-w-3xl mx-auto">
-          <div className="inline-flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-full glass-card border border-cyan-500/30 text-cyan-300 text-[10px] sm:text-[11px] font-mono shadow-[0_0_15px_rgba(6,182,212,0.2)]">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)] shrink-0" />
+          <div className="inline-flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-full glass-card border border-red-500/40 text-red-400 text-[10px] sm:text-[11px] font-mono shadow-[0_0_15px_rgba(239,68,68,0.25)]">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.9)] shrink-0" />
             <span className="truncate tracking-wider font-semibold">AUTONOMOUS AI SOFTWARE ENGINEERING ENGINE</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight font-sans">
             One Objective. <br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(6,182,212,0.35)]">
+            <span className="bg-gradient-to-r from-red-500 via-rose-400 to-red-300 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(239,68,68,0.4)]">
               Autonomous Loop.
             </span> <br />
             Real Verified Output.
@@ -104,10 +104,10 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
         <div className="p-4 sm:p-6 rounded-2xl glass-panel border border-white/10 shadow-2xl relative space-y-3.5 backdrop-blur-2xl">
           <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2">
             <span className="text-[10px] font-mono uppercase tracking-widest text-white/70 flex items-center space-x-2">
-              <Zap className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+              <Zap className="w-3.5 h-3.5 text-red-400 shrink-0" />
               <span className="font-bold">AUTONOMOUS_EXECUTION_LIFECYCLE</span>
             </span>
-            <span className="text-[9px] sm:text-[10px] font-mono text-cyan-300 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.15)] font-semibold">
+            <span className="text-[9px] sm:text-[10px] font-mono text-red-300 bg-red-500/10 px-2.5 py-1 rounded-lg border border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)] font-semibold">
               STATUS: IDLE — AWAITING PROMPT
             </span>
           </div>
@@ -120,9 +120,9 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
               return (
                 <div
                   key={step.label}
-                  className="p-3 rounded-xl glass-card border border-white/10 space-y-1.5 transition-all text-center group hover:border-cyan-500/40"
+                  className="p-3 rounded-xl glass-card border border-white/10 space-y-1.5 transition-all text-center group hover:border-red-500/40"
                 >
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center mx-auto bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 group-hover:bg-cyan-500/20 group-hover:scale-105 transition-all shadow-[0_0_10px_rgba(6,182,212,0.15)]">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center mx-auto bg-red-500/10 text-red-400 border border-red-500/25 group-hover:bg-red-500/20 group-hover:scale-105 transition-all shadow-[0_0_10px_rgba(239,68,68,0.2)]">
                     <Icon className="w-3.5 h-3.5" />
                   </div>
                   <span className="text-[10px] font-mono font-bold block text-white/90 tracking-wider">
@@ -141,12 +141,12 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
         <div className="p-5 sm:p-8 rounded-2xl glass-panel border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.5)] space-y-5 sm:space-y-6 backdrop-blur-2xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <div className="flex items-center space-x-2.5">
-              <div className="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.9)] animate-pulse" />
+              <div className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.9)] animate-pulse" />
               <h2 className="text-xs sm:text-sm font-mono uppercase tracking-widest text-white/95 font-extrabold">
                 DEFINE APPLICATION OBJECTIVE
               </h2>
             </div>
-            <span className="text-[10px] font-mono text-cyan-300/80 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
+            <span className="text-[10px] font-mono text-red-400/80 bg-red-500/10 px-2.5 py-0.5 rounded-full border border-red-500/20">
               ZERO-TRUST ISOLATION
             </span>
           </div>
@@ -155,7 +155,7 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-[10px] font-mono uppercase tracking-wider text-white/70 flex items-center space-x-1.5 font-bold">
-                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-red-400" />
                   <span>PROJECT GOAL & REQUIREMENTS</span>
                 </label>
                 {validationError && (
@@ -172,15 +172,15 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
                   if (validationError) setValidationError(null);
                 }}
                 rows={3}
-                placeholder="Describe what you want to build (e.g. Build an interactive student grievance platform with complaint filtering, priority tags, status updates, and automated test cases...)"
-                className="w-full p-4 rounded-xl glass-input text-white placeholder-white/30 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all resize-y leading-relaxed"
+                placeholder="Describe what you want to build (e.g. Build an interactive precision calculator with scientific functions, memory registers, and automated unit tests...)"
+                className="w-full p-4 rounded-xl glass-input text-white placeholder-white/30 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all resize-y leading-relaxed"
               />
             </div>
 
             {/* Autonomy Mode Selector */}
             <div className="space-y-2">
               <label className="text-[10px] font-mono uppercase tracking-wider text-white/70 flex items-center space-x-1.5 font-bold">
-                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                <ShieldCheck className="w-3.5 h-3.5 text-red-400" />
                 <span>AUTONOMY SUPERVISION POLICY</span>
               </label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3">
@@ -192,8 +192,8 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
                       : 'glass-card text-white/60 hover:text-white'
                   }`}
                 >
-                  <div className="flex items-center space-x-2 font-bold text-xs text-cyan-300 font-mono">
-                    <Zap className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
+                  <div className="flex items-center space-x-2 font-bold text-xs text-red-400 font-mono">
+                    <Zap className="w-3.5 h-3.5 shrink-0 text-red-400" />
                     <span>MAXIMUM AUTONOMY</span>
                   </div>
                   <p className="text-[10px] text-white/50 mt-1 leading-relaxed">
@@ -205,12 +205,12 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
                   onClick={() => setSelectedMode('BALANCED')}
                   className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
                     selectedMode === 'BALANCED'
-                      ? 'glass-card-active border-blue-500/50 text-white'
+                      ? 'glass-card-active border-rose-500/50 text-white'
                       : 'glass-card text-white/60 hover:text-white'
                   }`}
                 >
-                  <div className="flex items-center space-x-2 font-bold text-xs text-blue-300 font-mono">
-                    <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-blue-400" />
+                  <div className="flex items-center space-x-2 font-bold text-xs text-rose-300 font-mono">
+                    <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-rose-400" />
                     <span>BALANCED SUPERVISION</span>
                   </div>
                   <p className="text-[10px] text-white/50 mt-1 leading-relaxed">
@@ -248,11 +248,11 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
                     key={idx}
                     type="button"
                     onClick={() => handleSelectSuggestion(item.prompt)}
-                    className="p-3.5 text-left rounded-xl glass-card border border-white/10 hover:border-cyan-500/40 transition-all group"
+                    className="p-3.5 text-left rounded-xl glass-card border border-white/10 hover:border-red-500/40 transition-all group"
                   >
-                    <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors flex items-center justify-between font-mono">
+                    <div className="text-xs font-bold text-white group-hover:text-red-400 transition-colors flex items-center justify-between font-mono">
                       <span className="truncate">{item.title}</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-white/30 group-hover:text-cyan-300 transition-transform group-hover:translate-x-0.5 shrink-0" />
+                      <ArrowRight className="w-3.5 h-3.5 text-white/30 group-hover:text-red-400 transition-transform group-hover:translate-x-0.5 shrink-0" />
                     </div>
                     <p className="text-[10px] text-white/45 mt-1.5 line-clamp-2 leading-relaxed">
                       {item.desc}
@@ -270,20 +270,20 @@ export function LandingPage({ onStartBuild }: LandingPageProps) {
                   <span className="truncate">NO MOCK</span>
                 </span>
                 <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-red-400 shrink-0" />
                   <span className="truncate">REAL DISK</span>
                 </span>
                 <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-rose-400 shrink-0" />
                   <span className="truncate">NODE TESTS</span>
                 </span>
               </div>
 
               <button
                 type="submit"
-                className="w-full sm:w-auto flex items-center justify-center space-x-2.5 px-7 py-3 rounded-xl glass-button-primary text-black font-mono font-bold text-xs shadow-[0_0_20px_rgba(6,182,212,0.5)] transition-all cursor-pointer shrink-0"
+                className="w-full sm:w-auto flex items-center justify-center space-x-2.5 px-7 py-3 rounded-xl glass-button-primary text-white font-mono font-bold text-xs shadow-[0_0_22px_rgba(239,68,68,0.6)] transition-all cursor-pointer shrink-0"
               >
-                <Play className="w-3.5 h-3.5 fill-black shrink-0" />
+                <Play className="w-3.5 h-3.5 fill-white shrink-0" />
                 <span>START AUTONOMOUS BUILD</span>
               </button>
             </div>

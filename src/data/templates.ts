@@ -81,19 +81,20 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
   },
   {
     id: 'precision-scientific-calculator',
-    title: 'Precision Arithmetic & Financial Calculator',
+    title: 'Precision Scientific & Financial Calculator',
     icon: 'Calculator',
     category: 'Interactive Web Application',
-    shortDesc: 'Full decimal-precision arithmetic engine, keyboard shortcuts, equation history, and scientific operators.',
-    prompt: 'Build a production-ready precision scientific calculator web application with full arithmetic operations (+, -, *, /, %, ±, .), complete keyboard input handling, computation history tape with recall, zero-division error guards, clear/all-clear functions, and automated unit test suite with 100% functional test coverage.',
+    shortDesc: 'Decimal-precision arithmetic engine, scientific mode (√, xʸ, π), memory registers (MS, MR, MC), and smooth display animations.',
+    prompt: 'Build a production-ready precision scientific calculator web application with standard and scientific modes (square root, exponentiation, pi), dedicated memory registers (MS, MR, MC), responsive display animations, computation history tape with recall, zero-division guards, and unit tests with 100% test coverage.',
     estimatedTasks: 6,
     requirements: [
       'Full arithmetic engine supporting addition, subtraction, multiplication, and division',
-      'Decimal precision management and negative/positive sign inversion',
-      'Full physical keyboard event listener mapping for rapid calculations',
-      'Interactive calculation history tape with click-to-recall values',
-      'Zero-division and invalid equation error guards',
-      'Complete Node.js unit test suite verifying all mathematical operations'
+      'Scientific mode toggle revealing buttons for square root, exponentiation (xʸ), and pi (π)',
+      'Memory storage registers (MS, MR, MC, M+) to store and reuse intermediate results with indicator badge',
+      'Smooth transition animation on main display when numbers are entered or results are calculated',
+      'Decimal precision management and keyboard event listener mapping for rapid input',
+      'Interactive calculation history tape with click-to-recall values and zero-division guards',
+      'Complete Node.js unit test suite verifying all arithmetic and scientific operations'
     ],
     techStack: ['HTML5', 'CSS3', 'JavaScript ES6+', 'Node.js Test Runner']
   }

@@ -11,18 +11,35 @@ import {
   ChevronRight,
   ChevronDown,
   ShieldAlert,
-  GitBranch
+  GitBranch,
+  History
 } from 'lucide-react';
-import { Task, TaskStatus, ProjectState } from '../types';
+import { Task, TaskStatus, ProjectState, SystemStateSnapshot } from '../types';
+import { RestorePointsView } from './RestorePointsView';
 
 interface TaskHierarchyProps {
   project: ProjectState;
   selectedTaskId: string | null;
   onSelectTask: (taskId: string) => void;
+  onRestoreSnapshot?: (snapshot: SystemStateSnapshot) => void;
+  onCreateSnapshot?: () => void;
+  onDeleteSnapshot?: (snapshotId: string) => void;
+  isTakingSnapshot?: boolean;
 }
 
-export function TaskHierarchy({ project, selectedTaskId, onSelectTask }: TaskHierarchyProps) {
+export function TaskHierarchy({ 
+  project, 
+  selectedTaskId, 
+  onSelectTask,
+  onRestoreSnapshot,
+  onCreateSnapshot,
+  onDeleteSnapshot,
+  isTakingSnapshot = false
+}: TaskHierarchyProps) {
+  const [sidebarTab, setSidebarTab] = useState<'TASKS' | 'RESTORE_POINTS'>('TASKS');
   const [filterCategory, setFilterCategory] = useState<string>('ALL');
+
+  const snapshotsCount = project.restorePoints?.length || 0;
 
   const getStatusBadge = (status: TaskStatus) => {
     switch (status) {
@@ -95,46 +112,87 @@ export function TaskHierarchy({ project, selectedTaskId, onSelectTask }: TaskHie
   return (
     <div className="flex flex-col h-full rounded-2xl glass-panel border border-white/10 shadow-2xl overflow-hidden backdrop-blur-2xl">
       {/* Panel Header */}
-      <div className="p-4 border-b border-white/10 space-y-3 glass-panel-subtle">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Layers className="w-4 h-4 text-cyan-400" />
-            <h3 className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-white/80">
-              TASK HIERARCHY & MODULE TREE
-            </h3>
-          </div>
-          <span className="text-[10px] font-mono text-cyan-300 font-semibold bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-            {project.metrics.completedTasks} / {project.tasks.length} DONE
-          </span>
+      <div className="p-3 sm:p-4 border-b border-white/10 space-y-3 glass-panel-subtle">
+        {/* Top Sidebar Tab Navigation */}
+        <div className="flex items-center space-x-1 p-1 rounded-xl bg-black/50 border border-white/10 w-full">
+          <button
+            type="button"
+            onClick={() => setSidebarTab('TASKS')}
+            className={`flex-1 flex items-center justify-center space-x-1.5 py-1.5 px-2 rounded-lg text-[10px] font-mono font-bold transition-all ${
+              sidebarTab === 'TASKS'
+                ? 'glass-card-active text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.35)]'
+                : 'text-white/45 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>TASKS ({project.metrics.completedTasks}/{project.tasks.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSidebarTab('RESTORE_POINTS')}
+            className={`flex-1 flex items-center justify-center space-x-1.5 py-1.5 px-2 rounded-lg text-[10px] font-mono font-bold transition-all relative ${
+              sidebarTab === 'RESTORE_POINTS'
+                ? 'glass-card-active text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.35)]'
+                : 'text-white/45 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <History className="w-3.5 h-3.5" />
+            <span>RESTORE POINTS</span>
+            {snapshotsCount > 0 && (
+              <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                sidebarTab === 'RESTORE_POINTS' 
+                  ? 'bg-cyan-400 text-black shadow-[0_0_6px_rgba(6,182,212,0.8)]' 
+                  : 'bg-white/10 text-white/70'
+              }`}>
+                {snapshotsCount}
+              </span>
+            )}
+          </button>
         </div>
 
-        {/* Global Progress Bar */}
-        <div className="w-full bg-black/50 rounded-full h-1.5 overflow-hidden border border-white/10 shadow-inner">
-          <div
-            className="bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 h-full transition-all duration-500 shadow-[0_0_12px_rgba(6,182,212,0.8)]"
-            style={{ width: `${(project.metrics.completedTasks / project.tasks.length) * 100}%` }}
-          />
-        </div>
+        {sidebarTab === 'TASKS' && (
+          <>
+            {/* Global Progress Bar */}
+            <div className="w-full bg-black/50 rounded-full h-1.5 overflow-hidden border border-white/10 shadow-inner">
+              <div
+                className="bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 h-full transition-all duration-500 shadow-[0_0_12px_rgba(6,182,212,0.8)]"
+                style={{ width: `${(project.metrics.completedTasks / Math.max(1, project.tasks.length)) * 100}%` }}
+              />
+            </div>
 
-        {/* Category Pill Filter */}
-        <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-0.5 text-[10px] font-mono">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setFilterCategory(cat)}
-              className={`px-2.5 py-1 rounded-lg whitespace-nowrap transition-all ${
-                filterCategory === cat
-                  ? 'glass-card-active text-cyan-300 font-bold shadow-[0_0_10px_rgba(6,182,212,0.3)]'
-                  : 'text-white/50 hover:text-white glass-button border border-transparent'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+            {/* Category Pill Filter */}
+            <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-0.5 text-[10px] font-mono">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setFilterCategory(cat)}
+                  className={`px-2.5 py-1 rounded-lg whitespace-nowrap transition-all ${
+                    filterCategory === cat
+                      ? 'glass-card-active text-cyan-300 font-bold shadow-[0_0_10px_rgba(6,182,212,0.3)]'
+                      : 'text-white/50 hover:text-white glass-button border border-transparent'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Task List */}
+      {/* Main Panel Content Area */}
+      {sidebarTab === 'RESTORE_POINTS' ? (
+        <div className="flex-1 overflow-hidden p-3.5">
+          <RestorePointsView
+            project={project}
+            onRestoreSnapshot={onRestoreSnapshot || (() => {})}
+            onCreateSnapshot={onCreateSnapshot || (() => {})}
+            onDeleteSnapshot={onDeleteSnapshot || (() => {})}
+            isTakingSnapshot={isTakingSnapshot}
+          />
+        </div>
+      ) : (
       <div className="flex-1 overflow-y-auto p-3.5 space-y-2.5">
         {filteredTasks.map((task) => {
           const isSelected = selectedTaskId === task.id || project.currentTaskId === task.id;
@@ -205,10 +263,11 @@ export function TaskHierarchy({ project, selectedTaskId, onSelectTask }: TaskHie
           );
         })}
       </div>
+      )}
 
       {/* Task Summary Footer */}
       <div className="p-3 border-t border-white/10 glass-panel-subtle text-[10px] font-mono text-white/50 flex items-center justify-between">
-        <span>BOUNDED AUTONOMY: 5 REPAIRS</span>
+        <span>{sidebarTab === 'RESTORE_POINTS' ? `${snapshotsCount} SNAPSHOTS SAVED` : 'BOUNDED AUTONOMY: 5 REPAIRS'}</span>
         <span className="text-emerald-400 font-bold flex items-center space-x-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.8)] animate-pulse" />
           <span>AUTONOMOUS_LOOP_ON</span>

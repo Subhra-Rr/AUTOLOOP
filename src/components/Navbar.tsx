@@ -19,9 +19,12 @@ import {
   GitFork,
   ExternalLink,
   Menu,
-  X
+  X,
+  Download,
+  Check
 } from 'lucide-react';
 import { ProjectState } from '../types';
+import { downloadProjectAsZip } from '../utils/downloadProjectZip';
 
 export type ActiveTabType = 'preview' | 'workspace' | 'code' | 'repair' | 'security' | 'evaluation' | 'dod' | 'timeline';
 
@@ -35,6 +38,7 @@ interface NavbarProps {
   onResume: () => void;
   onAbort: () => void;
   onReset: () => void;
+  onDownloadProject?: () => void;
 }
 
 export function Navbar({
@@ -46,9 +50,27 @@ export function Navbar({
   onPause,
   onResume,
   onAbort,
-  onReset
+  onReset,
+  onDownloadProject
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [downloadingZip, setDownloadingZip] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
+
+  const handleDownloadProject = async () => {
+    if (!project || downloadingZip) return;
+    try {
+      setDownloadingZip(true);
+      await downloadProjectAsZip(project);
+      setDownloadSuccess(true);
+      onDownloadProject?.();
+      setTimeout(() => setDownloadSuccess(false), 2500);
+    } catch (err) {
+      console.error('Failed to bundle project ZIP:', err);
+    } finally {
+      setDownloadingZip(false);
+    }
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -91,8 +113,8 @@ export function Navbar({
       case 'TESTING':
       case 'PLANNING':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded text-[9px] sm:text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.4)] animate-pulse whitespace-nowrap">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded text-[9px] sm:text-[10px] font-mono font-bold bg-red-500/15 text-red-400 border border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-pulse whitespace-nowrap">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
             {project.status}
           </span>
         );
@@ -116,7 +138,7 @@ export function Navbar({
   ];
 
   return (
-    <header className="sticky top-0 z-50 glass-panel border-b border-white/10 backdrop-blur-2xl bg-[#030712]/75">
+    <header className="sticky top-0 z-50 glass-panel border-b border-white/10 backdrop-blur-2xl bg-[#060204]/85">
       {/* Top Main Navigation Bar */}
       <div className="h-14 flex items-center justify-between px-3 sm:px-6">
         {/* Brand & Project Info */}
@@ -125,17 +147,17 @@ export function Navbar({
             onClick={onReset}
             className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group shrink-0"
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/80 to-blue-600/80 p-[1px] shadow-[0_0_20px_rgba(6,182,212,0.4)] group-hover:scale-105 transition-all">
-              <div className="w-full h-full bg-[#030712]/70 backdrop-blur-md rounded-[7px] flex items-center justify-center">
-                <span className="font-bold text-cyan-300 text-xs font-mono tracking-tighter">AL</span>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-600/90 to-rose-700/90 p-[1px] shadow-[0_0_20px_rgba(239,68,68,0.55)] group-hover:scale-105 transition-all">
+              <div className="w-full h-full bg-[#080305]/80 backdrop-blur-md rounded-[7px] flex items-center justify-center">
+                <span className="font-bold text-red-400 text-xs font-mono tracking-tighter">AL</span>
               </div>
             </div>
             <div>
               <h1 className="text-[11px] sm:text-xs font-bold tracking-widest text-white uppercase truncate flex items-center space-x-1">
                 <span>AUTOLOOP</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse hidden sm:inline-block" />
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse hidden sm:inline-block shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
               </h1>
-              <p className="text-[9px] sm:text-[10px] text-cyan-400/90 font-mono hidden xs:block tracking-wider">
+              <p className="text-[9px] sm:text-[10px] text-red-400/90 font-mono hidden xs:block tracking-wider">
                 AUTONOMOUS ENGINE
               </p>
             </div>
@@ -165,11 +187,11 @@ export function Navbar({
                   onClick={() => onTabChange(item.id)}
                   className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                     item.highlight && isActive
-                      ? 'glass-button-primary text-black shadow-[0_0_15px_rgba(6,182,212,0.6)] font-extrabold'
+                      ? 'glass-button-primary text-white shadow-[0_0_18px_rgba(239,68,68,0.7)] font-extrabold'
                       : item.highlight
-                      ? 'text-cyan-300 bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 hover:border-cyan-400/50 shadow-[0_0_10px_rgba(6,182,212,0.15)]'
+                      ? 'text-red-300 bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 hover:border-red-400/50 shadow-[0_0_12px_rgba(239,68,68,0.25)]'
                       : isActive
-                      ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.25)] backdrop-blur-md'
+                      ? 'bg-red-500/15 text-red-300 border border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.3)] backdrop-blur-md'
                       : 'text-white/60 hover:text-white hover:bg-white/10 border border-transparent'
                   }`}
                 >
@@ -193,14 +215,46 @@ export function Navbar({
               {/* Live Telemetry Chips (Desktop/Tablet) */}
               <div className="hidden lg:flex items-center space-x-2 text-[10px] font-mono">
                 <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg glass-card text-white/80 border border-white/10">
-                  <Clock className="w-3 h-3 text-cyan-400" />
+                  <Clock className="w-3 h-3 text-red-400" />
                   <span>{formatTime(project.elapsedSeconds)}</span>
                 </div>
                 <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg glass-card text-white/80 border border-white/10">
-                  <Cpu className="w-3 h-3 text-cyan-400" />
+                  <Cpu className="w-3 h-3 text-red-400" />
                   <span>{project.tokensUsed} TKN</span>
                 </div>
               </div>
+
+              {/* Download Project ZIP Archive Button */}
+              <button
+                onClick={handleDownloadProject}
+                disabled={downloadingZip || !project.files || project.files.length === 0}
+                title={`Download ${project.files?.length || 0} project files as a ZIP archive for local execution`}
+                className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-mono font-bold transition-all ${
+                  downloadSuccess
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
+                    : 'glass-button text-red-300 hover:text-white border border-red-500/30 hover:border-red-400/50 shadow-[0_0_10px_rgba(239,68,68,0.2)]'
+                } disabled:opacity-40`}
+              >
+                {downloadSuccess ? (
+                  <>
+                    <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" />
+                    <span className="hidden sm:inline">ZIP DOWNLOADED</span>
+                    <span className="sm:hidden">SAVED</span>
+                  </>
+                ) : downloadingZip ? (
+                  <>
+                    <span className="w-3 h-3 sm:w-3.5 sm:h-3.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                    <span className="hidden sm:inline">ARCHIVING...</span>
+                    <span className="sm:hidden">ZIP...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-400" />
+                    <span className="hidden md:inline">DOWNLOAD PROJECT</span>
+                    <span className="md:hidden">ZIP</span>
+                  </>
+                )}
+              </button>
 
               {/* Loop Action Controls */}
               <div className="flex items-center space-x-1.5 sm:space-x-2 pl-1.5 sm:pl-2 border-l border-white/10">
@@ -217,9 +271,9 @@ export function Navbar({
                   <button
                     onClick={onResume}
                     title="Resume autonomous execution"
-                    className="flex items-center space-x-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg glass-button-primary text-black text-[11px] sm:text-xs font-mono font-bold shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all"
+                    className="flex items-center space-x-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg glass-button-primary text-white text-[11px] sm:text-xs font-mono font-bold shadow-[0_0_18px_rgba(239,68,68,0.6)] transition-all"
                   >
-                    <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-black" />
+                    <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-white" />
                     <span className="hidden sm:inline">RESUME</span>
                   </button>
                 ) : null}
@@ -236,8 +290,8 @@ export function Navbar({
             </>
           ) : (
             <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg glass-card border border-cyan-500/30 text-cyan-300 text-[10px] sm:text-xs font-mono shadow-[0_0_12px_rgba(6,182,212,0.2)]">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+              <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg glass-card border border-red-500/30 text-red-400 text-[10px] sm:text-xs font-mono shadow-[0_0_12px_rgba(239,68,68,0.25)]">
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
                 <span className="hidden xs:inline font-bold tracking-wider">AWAITING OBJECTIVE</span>
                 <span className="xs:hidden">READY</span>
               </div>
@@ -261,11 +315,11 @@ export function Navbar({
                 onClick={() => onTabChange(item.id)}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider shrink-0 transition-all ${
                   item.highlight && isActive
-                    ? 'glass-button-primary text-black font-extrabold shadow-[0_0_12px_rgba(6,182,212,0.5)]'
+                    ? 'glass-button-primary text-white font-extrabold shadow-[0_0_15px_rgba(239,68,68,0.6)]'
                     : item.highlight
-                    ? 'text-cyan-300 bg-cyan-500/10 border border-cyan-500/30'
+                    ? 'text-red-300 bg-red-500/10 border border-red-500/30'
                     : isActive
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
+                    ? 'bg-red-500/20 text-red-300 border border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.35)]'
                     : 'text-white/70 glass-card border border-white/5 hover:text-white'
                 }`}
               >

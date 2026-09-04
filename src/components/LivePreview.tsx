@@ -141,7 +141,7 @@ export function LivePreview({ project }: LivePreviewProps) {
 
           <div className="flex items-center space-x-1.5 text-xs font-mono min-w-0 truncate">
             <span className="text-white/40 text-[10px] sm:text-[11px] uppercase tracking-wider hidden xs:inline shrink-0">ARTIFACT:</span>
-            <span className="text-cyan-400 font-bold text-xs truncate max-w-[140px] sm:max-w-[200px]">
+            <span className="text-red-400 font-bold text-xs truncate max-w-[140px] sm:max-w-[200px]">
               {project.name || 'Application Preview'}
             </span>
           </div>
@@ -151,7 +151,7 @@ export function LivePreview({ project }: LivePreviewProps) {
         <div className="flex-1 max-w-md hidden md:flex items-center px-3 py-1 rounded bg-[#030303] border border-white/10 text-[11px] font-mono text-white/70">
           <ShieldCheck className="w-3 h-3 text-green-400 mr-2 shrink-0" />
           <span className="text-white/30 mr-1 shrink-0">https://autoloop.sandbox</span>
-          <span className="text-cyan-300 truncate">{previewUrl}</span>
+          <span className="text-red-300 truncate">{previewUrl}</span>
           {isReady && (
             <span className="ml-auto text-[9px] px-1.5 py-0.2 rounded bg-green-500/20 text-green-400 border border-green-500/30 shrink-0">
               LIVE
@@ -167,7 +167,7 @@ export function LivePreview({ project }: LivePreviewProps) {
               onClick={() => setDeviceMode('desktop')}
               title="Desktop View"
               className={`p-1 sm:p-1.5 rounded transition-colors ${
-                deviceMode === 'desktop' ? 'bg-cyan-500/20 text-cyan-400 font-bold' : 'text-white/40 hover:text-white'
+                deviceMode === 'desktop' ? 'bg-red-500/20 text-red-400 font-bold' : 'text-white/40 hover:text-white'
               }`}
             >
               <Monitor className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -176,7 +176,7 @@ export function LivePreview({ project }: LivePreviewProps) {
               onClick={() => setDeviceMode('tablet')}
               title="Tablet View (768px)"
               className={`p-1 sm:p-1.5 rounded transition-colors ${
-                deviceMode === 'tablet' ? 'bg-cyan-500/20 text-cyan-400 font-bold' : 'text-white/40 hover:text-white'
+                deviceMode === 'tablet' ? 'bg-red-500/20 text-red-400 font-bold' : 'text-white/40 hover:text-white'
               }`}
             >
               <Tablet className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -185,7 +185,7 @@ export function LivePreview({ project }: LivePreviewProps) {
               onClick={() => setDeviceMode('mobile')}
               title="Mobile View (375px)"
               className={`p-1 sm:p-1.5 rounded transition-colors ${
-                deviceMode === 'mobile' ? 'bg-cyan-500/20 text-cyan-400 font-bold' : 'text-white/40 hover:text-white'
+                deviceMode === 'mobile' ? 'bg-red-500/20 text-red-400 font-bold' : 'text-white/40 hover:text-white'
               }`}
             >
               <Smartphone className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -213,7 +213,7 @@ export function LivePreview({ project }: LivePreviewProps) {
             title="Live DOM & Console Monitor"
             className={`p-1 sm:p-1.5 rounded border text-xs font-mono transition-colors flex items-center space-x-1 ${
               showConsoleDock
-                ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-400'
+                ? 'bg-red-500/20 border-red-500/40 text-red-400'
                 : 'bg-white/5 border-white/10 text-white/60 hover:text-white'
             }`}
           >
@@ -243,7 +243,7 @@ export function LivePreview({ project }: LivePreviewProps) {
           <button
             onClick={handleOpenNewTab}
             title="Open Live App in Dedicated Tab"
-            className="flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-2.5 py-1 rounded bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-mono font-bold transition-all shadow-[0_0_12px_rgba(6,182,212,0.3)] shrink-0"
+            className="flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-2.5 py-1 rounded bg-red-600 hover:bg-red-500 text-white text-xs font-mono font-bold transition-all shadow-[0_0_15px_rgba(239,68,68,0.5)] shrink-0"
           >
             <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span className="hidden sm:inline">OPEN IN NEW TAB</span>
@@ -259,7 +259,7 @@ export function LivePreview({ project }: LivePreviewProps) {
               <span className="truncate">SOURCE: {htmlFile.path}</span>
               <button 
                 onClick={() => setShowHtmlSource(false)}
-                className="text-cyan-400 hover:underline shrink-0 ml-2"
+                className="text-red-400 hover:underline shrink-0 ml-2"
               >
                 Back to Live View
               </button>
@@ -286,14 +286,14 @@ export function LivePreview({ project }: LivePreviewProps) {
             />
             {isLoading && (
               <div className="absolute inset-0 bg-[#070707]/90 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 z-10">
-                <RotateCw className="w-6 h-6 text-cyan-400 animate-spin" />
+                <RotateCw className="w-6 h-6 text-red-500 animate-spin" />
                 <span className="text-xs font-mono text-white/70">Connecting to Real Workspace Sandbox...</span>
               </div>
             )}
           </div>
         ) : (
           <div className="max-w-md p-4 sm:p-6 rounded-lg bg-[#0a0a0a] border border-white/10 text-center space-y-4 mx-2">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mx-auto">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 mx-auto">
               <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
             </div>
             <div className="space-y-1.5">
@@ -301,7 +301,7 @@ export function LivePreview({ project }: LivePreviewProps) {
                 Synthesizing Web Application Artifacts...
               </h3>
               <p className="text-[11px] sm:text-xs text-white/50 leading-relaxed font-sans">
-                The autonomous agent is generating real source files into the isolated disk workspace (<code className="text-cyan-400">.workspaces/{project.projectId}</code>).
+                The autonomous agent is generating real source files into the isolated disk workspace (<code className="text-red-400">.workspaces/{project.projectId}</code>).
               </p>
             </div>
             <div className="p-2.5 sm:p-3 rounded bg-black/50 border border-white/5 text-[10px] sm:text-[11px] font-mono text-left space-y-1">
@@ -311,7 +311,7 @@ export function LivePreview({ project }: LivePreviewProps) {
               </div>
               <div className="flex justify-between text-white/40">
                 <span>FILES ON DISK:</span>
-                <span className="text-cyan-400 font-bold">{project.files.length} files</span>
+                <span className="text-red-400 font-bold">{project.files.length} files</span>
               </div>
               <div className="flex justify-between text-white/40">
                 <span>ACTIVE PHASE:</span>
@@ -327,7 +327,7 @@ export function LivePreview({ project }: LivePreviewProps) {
         <div className="h-32 bg-[#09090b] border-t border-white/10 flex flex-col shrink-0 font-mono text-[10px]">
           <div className="px-3 py-1 bg-black/60 border-b border-white/5 flex items-center justify-between text-white/60">
             <div className="flex items-center space-x-2">
-              <Terminal className="w-3 h-3 text-cyan-400" />
+              <Terminal className="w-3 h-3 text-red-400" />
               <span className="font-bold text-white/80">INTERACTIVE RUNTIME MONITOR</span>
               {interactiveElementsCount > 0 && (
                 <span className="text-green-400">({interactiveElementsCount} active interactable elements bound)</span>
@@ -349,7 +349,7 @@ export function LivePreview({ project }: LivePreviewProps) {
               interactionEvents.map((ev) => (
                 <div key={ev.id} className="flex items-start space-x-2 hover:bg-white/5 px-1 py-0.5 rounded">
                   <span className="text-white/30 shrink-0">[{ev.timestamp}]</span>
-                  <span className={`px-1 rounded text-[8px] font-bold ${ev.level === 'ERROR' ? 'bg-red-500/20 text-red-400' : 'bg-cyan-500/20 text-cyan-300'}`}>
+                  <span className={`px-1 rounded text-[8px] font-bold ${ev.level === 'ERROR' ? 'bg-red-500/20 text-red-400' : 'bg-red-500/20 text-red-300'}`}>
                     {ev.type}
                   </span>
                   <span className="text-white/80 flex-1 truncate">{ev.label}</span>

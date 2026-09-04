@@ -197,6 +197,152 @@ app.post('/api/projects/:id/intervention/reject', (req: Request, res: Response) 
   return res.json({ success: true, project });
 });
 
+// User sentiment feedback for pipeline nodes
+app.post('/api/projects/:id/feedback', (req: Request, res: Response) => {
+  const project = projectsStore.get(req.params.id);
+  if (!project) return res.status(404).json({ error: 'Project not found' });
+
+  const { nodeId, sentiment, comment } = req.body as { nodeId: string; sentiment: 'UP' | 'DOWN'; comment?: string };
+  if (!nodeId || (sentiment !== 'UP' && sentiment !== 'DOWN')) {
+    return res.status(400).json({ error: 'Valid nodeId and sentiment (UP | DOWN) required' });
+  }
+
+  if (!project.nodeFeedback) {
+    project.nodeFeedback = {};
+  }
+  project.nodeFeedback[nodeId] = sentiment;
+
+  const sentimentIcon = sentiment === 'UP' ? '👍 THUMBS_UP' : '👎 THUMBS_DOWN';
+  project.terminalLogs.push({
+    id: 'log-' + Math.random().toString(36).substring(2, 9),
+    timestamp: new Date().toLocaleTimeString(),
+    agent: 'ORCHESTRATOR',
+    level: sentiment === 'UP' ? 'SUCCESS' : 'WARN',
+    message: `[FEEDBACK] Supervisor recorded ${sentimentIcon} sentiment on stage [${nodeId}]. Incorporating into autonomous planner and self-repair decision heuristics.`
+  });
+
+  projectsStore.set(project.projectId, project);
+  return res.json({ success: true, project, nodeFeedback: project.nodeFeedback });
+});
+
+// System State Snapshot & Restore Points API
+app.get('/api/projects/:id/snapshots', (req: Request, res: Response) => {
+  const project = projectsStore.get(req.params.id);
+  if (!project) return res.status(404).json({ error: 'Project not found' });
+  return res.json({ snapshots: project.restorePoints || [] });
+});
+
+app.post('/api/projects/:id/snapshots', (req: Request, res: Response) => {
+  const project = projectsStore.get(req.params.id);
+  if (!project) return res.status(404).json({ error: 'Project not found' });
+
+  const { name, isAutomatic = false } = req.body;
+  const currentTask = project.currentTaskId ? project.tasks.find(t => t.id === project.currentTaskId) : null;
+  const stage = project.activeNode || 'PLAN';
+  const autoLabel = isAutomatic ? 'Auto Snapshot' : 'Manual Snapshot';
+  const snapshotName = name || `${autoLabel} @ ${new Date().toLocaleTimeString()} [${stage}]`;
+
+  // Create a clean JSON dump of the project state
+  const stateClone = JSON.parse(JSON.stringify(project));
+  delete stateClone.restorePoints; // prevent recursive growth
+
+  const snapshot = {
+    id: 'snap-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6),
+    projectId: project.projectId,
+    name: snapshotName,
+    timestamp: new Date().toLocaleTimeString(),
+    stage,
+    taskCode: currentTask?.code,
+    taskTitle: currentTask?.title,
+    completedTasks: project.metrics?.completedTasks || 0,
+    totalTasks: project.tasks?.length || 0,
+    filesCount: project.files?.length || 0,
+    tokensUsed: project.tokensUsed || 0,
+    elapsedSeconds: project.elapsedSeconds || 0,
+    summary: `${stage} stage • ${project.metrics?.completedTasks || 0}/${project.tasks?.length || 0} tasks • ${project.files?.length || 0} files`,
+    stateDumpJson: JSON.stringify(stateClone, null, 2),
+    isAutomatic: Boolean(isAutomatic)
+  };
+
+  if (!project.restorePoints) {
+    project.restorePoints = [];
+  }
+
+  // Prepend newest snapshot and cap history at 30 entries
+  project.restorePoints = [snapshot, ...project.restorePoints].slice(0, 30);
+
+  project.terminalLogs.push({
+    id: 'log-' + Math.random().toString(36).substring(2, 9),
+    timestamp: new Date().toLocaleTimeString(),
+    agent: 'ORCHESTRATOR',
+    level: 'INFO',
+    message: `[RESTORE_POINT] System State snapshot captured: "${snapshot.name}" (${snapshot.filesCount} files, ${snapshot.completedTasks}/${snapshot.totalTasks} tasks verified). JSON dump ready.`
+  });
+
+  projectsStore.set(project.projectId, project);
+  return res.status(201).json({ success: true, snapshot, project });
+});
+
+app.post('/api/projects/:id/restore', (req: Request, res: Response) => {
+  const currentProject = projectsStore.get(req.params.id);
+  if (!currentProject) return res.status(404).json({ error: 'Project not found' });
+
+  const { snapshotId, stateDumpJson } = req.body;
+  let targetState: any = null;
+  let snapshotName = 'System Snapshot';
+
+  if (snapshotId) {
+    const found = currentProject.restorePoints?.find(s => s.id === snapshotId);
+    if (!found) return res.status(404).json({ error: 'Snapshot not found' });
+    try {
+      targetState = JSON.parse(found.stateDumpJson);
+      snapshotName = found.name;
+    } catch (e: any) {
+      return res.status(400).json({ error: `Invalid snapshot JSON: ${e.message}` });
+    }
+  } else if (stateDumpJson) {
+    try {
+      targetState = typeof stateDumpJson === 'string' ? JSON.parse(stateDumpJson) : stateDumpJson;
+      snapshotName = 'Custom JSON Dump';
+    } catch (e: any) {
+      return res.status(400).json({ error: `Malformed JSON dump provided: ${e.message}` });
+    }
+  } else {
+    return res.status(400).json({ error: 'Provide either snapshotId or stateDumpJson to restore' });
+  }
+
+  // Preserve existing restore points history and add restoration log
+  const existingRestorePoints = currentProject.restorePoints || [];
+  targetState.restorePoints = existingRestorePoints;
+
+  if (!targetState.terminalLogs) {
+    targetState.terminalLogs = [];
+  }
+
+  targetState.terminalLogs.push({
+    id: 'log-' + Math.random().toString(36).substring(2, 9),
+    timestamp: new Date().toLocaleTimeString(),
+    agent: 'ORCHESTRATOR',
+    level: 'SUCCESS',
+    message: `[RESTORE_APPLIED] System state reverted to restore point "${snapshotName}". Stage reset to [${targetState.activeNode}], ${targetState.metrics?.completedTasks || 0} tasks preserved.`
+  });
+
+  projectsStore.set(targetState.projectId, targetState);
+  return res.json({ success: true, project: targetState, restoredFrom: snapshotName });
+});
+
+app.delete('/api/projects/:id/snapshots/:snapshotId', (req: Request, res: Response) => {
+  const project = projectsStore.get(req.params.id);
+  if (!project) return res.status(404).json({ error: 'Project not found' });
+
+  const { snapshotId } = req.params;
+  if (project.restorePoints) {
+    project.restorePoints = project.restorePoints.filter(s => s.id !== snapshotId);
+  }
+  projectsStore.set(project.projectId, project);
+  return res.json({ success: true, project });
+});
+
 // Live Sandbox Application Preview Handler
 app.get(['/api/projects/:id/preview', '/api/projects/:id/preview/*'], async (req: Request, res: Response) => {
   const projectId = req.params.id;

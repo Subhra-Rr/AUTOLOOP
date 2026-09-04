@@ -9,7 +9,7 @@
 
   body {
     font-family: var(--font-sans);
-    background-color: #030712;
+    background-color: #060204;
     color: #f1f5f9;
     overflow-x: hidden;
   }
@@ -23,21 +23,21 @@
   }
 }
 
-/* Glassmorphism Design System Utilities */
+/* Glassmorphism Design System Utilities (Hacking Red Theme) */
 .glass-panel {
-  background: rgba(13, 17, 28, 0.65);
+  background: rgba(18, 6, 9, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(239, 68, 68, 0.15);
 }
 
 .glass-panel-subtle {
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(24, 7, 11, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.12);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(239, 68, 68, 0.1);
 }
 
 .glass-card {
@@ -45,36 +45,36 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(6, 182, 212, 0.35);
-  box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.35), 0 0 15px rgba(6, 182, 212, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.45), 0 0 18px rgba(239, 68, 68, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
 }
 
 .glass-card-active {
-  background: rgba(6, 182, 212, 0.08);
+  background: rgba(239, 68, 68, 0.12);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(6, 182, 212, 0.45);
-  box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.35), 0 0 20px rgba(6, 182, 212, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.55);
+  box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.45), 0 0 22px rgba(239, 68, 68, 0.35), inset 0 1px 0 0 rgba(239, 68, 68, 0.25);
 }
 
 .glass-input {
-  background: rgba(3, 7, 18, 0.6);
+  background: rgba(10, 3, 5, 0.7);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.5);
 }
 
 .glass-input:focus {
-  background: rgba(3, 7, 18, 0.8);
-  border-color: rgba(6, 182, 212, 0.6);
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.25), inset 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  background: rgba(14, 4, 7, 0.85);
+  border-color: rgba(239, 68, 68, 0.7);
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.35), inset 0 1px 2px 0 rgba(0, 0, 0, 0.5);
 }
 
 .glass-button {
@@ -88,22 +88,22 @@
 
 .glass-button:hover {
   background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(239, 68, 68, 0.35);
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
 }
 
 .glass-button-primary {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.9), rgba(59, 130, 246, 0.9));
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(185, 28, 28, 0.95));
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 20px 0 rgba(6, 182, 212, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 20px 0 rgba(239, 68, 68, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.35);
   transition: all 0.2s ease;
 }
 
 .glass-button-primary:hover {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 1), rgba(59, 130, 246, 1));
-  box-shadow: 0 6px 28px 0 rgba(6, 182, 212, 0.6), 0 0 15px rgba(6, 182, 212, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+  background: linear-gradient(135deg, rgba(255, 30, 70, 1), rgba(220, 38, 38, 1));
+  box-shadow: 0 6px 28px 0 rgba(239, 68, 68, 0.75), 0 0 22px rgba(239, 68, 68, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
   transform: translateY(-1px);
 }
 
@@ -111,26 +111,26 @@
 .bg-grid-pattern {
   background-size: 32px 32px;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    linear-gradient(to right, rgba(239, 68, 68, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(239, 68, 68, 0.04) 1px, transparent 1px);
 }
 
 .bg-dot-pattern {
   background-size: 24px 24px;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(239, 68, 68, 0.1) 1px, transparent 1px);
 }
 
-/* Immersive UI Neon Glowing accents */
-.glow-cyan {
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.45);
+/* Immersive UI Neon Glowing accents (Hacking Mastermind Red) */
+.glow-cyan, .glow-hacking-red {
+  box-shadow: 0 0 22px rgba(239, 68, 68, 0.55);
 }
 
-.glow-cyan-sm {
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.7);
+.glow-cyan-sm, .glow-hacking-red-sm {
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.85);
 }
 
 .glow-red {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.65);
 }
 
 .glow-green {
